@@ -256,11 +256,12 @@ const openStreamingService = (providerName: string) => {
 
   const slug = formatMovieTitle(movie.title);
   const year = getYear(movie.release_date);
+
+  type ProviderMap = {
+    [key: string]: string;  // Add index signature
+  };
   
-  // Map of provider names to their URLs
-  // Many streaming services don't have predictable direct URLs to movies
-  // but we can make best attempts for some popular ones
-  const providerUrls = {
+  const providerUrls: ProviderMap = {
     // Major Global Streaming Services
     'Netflix': `https://www.netflix.com/search?q=${encodeURIComponent(movie.title)}`,
     'Amazon Prime Video': `https://www.amazon.com/gp/video/search/ref=atv_sr_sug_3?phrase=${encodeURIComponent(movie.title)}&ie=UTF8`,

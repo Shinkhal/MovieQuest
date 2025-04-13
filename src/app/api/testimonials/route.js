@@ -1,5 +1,5 @@
 import { connectToDatabase } from "@/lib/mongodb";
-import Testimonial from "@/models/Testimonial";
+import Testimonial from "@/models/testimonial";
 
 export async function GET() {
   await connectToDatabase();

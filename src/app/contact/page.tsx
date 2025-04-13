@@ -26,7 +26,7 @@ export default function ContactPage() {
       },
       body: JSON.stringify({
         access_key: process.env.NEXT_PUBLIC_FORM_KEY, 
-        name: target.name.value,
+        name: target.first.value,
         email: target.email.value,
         message: target.message.value,
       }),
@@ -68,7 +68,7 @@ export default function ContactPage() {
                 <Label htmlFor="name">Your Name</Label>
                 <Input
                   id="name"
-                  name="name"
+                  name="first"
                   placeholder="Enter your name"
                   required
                   className={inputStyle}
