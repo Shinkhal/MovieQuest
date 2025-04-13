@@ -17,7 +17,7 @@ export default function Navbar() {
   return (
     <header className="bg-black/90 backdrop-blur-md text-white sticky top-0 z-50 shadow-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 md:py-4 lg:px-8">
-        {/* Logo */}
+        
         <Link
           href="/"
           className="text-2xl font-extrabold tracking-tight text-white hover:text-gray-300 transition"
@@ -25,7 +25,6 @@ export default function Navbar() {
           🎬 MovieQuest
         </Link>
 
-        {/* Desktop Nav */}
         <div className="hidden md:flex gap-8">
           {navLinks.map((link) => (
             <Link
@@ -38,7 +37,6 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -53,9 +51,8 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Dropdown Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-md shadow-lg rounded-b-xl px-6 py-4 space-y-2 transition-all duration-300 ease-in-out">
+        <div className="md:hidden bg-gray-900 backdrop-blur-md shadow-lg rounded-b-xl px-6 py-4 space-y-2 transition-all duration-300 ease-in-out">
           {navLinks.map((link) => (
             <Link
               key={link.href}
