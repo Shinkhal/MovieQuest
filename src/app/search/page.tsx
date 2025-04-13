@@ -444,7 +444,6 @@ export default function Searches() {
                 {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
               </p>
             </div>
-
             <div className="flex flex-col sm:flex-row gap-4">
               {searchType === 'search' && (
                 <div className="flex gap-2">
@@ -477,7 +476,7 @@ export default function Searches() {
                   }}
                   value={sortBy}
                 >
-                  <TabsList className="bg-cyan-700 border border-gray-700 text-black">
+                  <TabsList className="bg-cyan-700 border border-gray-700 text-white">
                     <TabsTrigger value="popularity">Popular</TabsTrigger>
                     <TabsTrigger value="rating">Top Rated</TabsTrigger>
                     <TabsTrigger value="date">Recent</TabsTrigger>
@@ -512,9 +511,9 @@ export default function Searches() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {[...Array(10)].map((_, i) => (
-                <Card key={i} className="bg-gray-800 border-gray-700 overflow-hidden shadow-md">
+                <Card key={i} className="bg-gray-800 border-gray-700 shadow-md">
                   <div className="relative aspect-[2/3] w-full">
                     <Skeleton className="absolute inset-0 bg-gray-700" />
                   </div>
@@ -556,14 +555,14 @@ export default function Searches() {
           ) : (
             <>
               <motion.div 
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
               >
                 {movies.map((movie) => (
                   <motion.div key={movie.id} variants={itemVariants}>
-                    <Card className="bg-gray-800 border-gray-700 overflow-hidden hover:border-indigo-600/40 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 h-full flex flex-col group">
+                    <Card className="bg-gray-800 border-gray-700 overflow-hidden hover:border-indigo-600/40 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 h-full flex flex-col group ">
                       <div className="relative aspect-[2/3] w-full overflow-hidden">
                         {movie.poster_path ? (
                             
