@@ -1,13 +1,10 @@
 "use client";
 
-import { motion } from 'framer-motion';
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Star, PenSquare } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Star, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 // Define TypeScript interface for testimonial objects
 interface Testimonial {
@@ -44,34 +41,34 @@ export default function TestimonialSection() {
     
     if (filteredTestimonials.length === 0) {
       return (
-        <div className="text-center text-gray-400">
-          <p>No {roleFilter} testimonials available yet.</p>
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-sm">No {roleFilter} testimonials available yet.</p>
         </div>
       );
     }
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTestimonials.map((t, i) => (
-          <Card key={i} className="bg-gray-700 border-indigo-900/20 shadow-xl">
-            <CardHeader>
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center font-semibold text-white">
+          <Card key={i} className="bg-gray-900/50 border-gray-800 hover:bg-gray-900/70 transition-colors duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-sm font-medium text-gray-300 border border-gray-700">
                   {t.avatar}
                 </div>
                 <div>
-                  <CardTitle className="text-lg text-white font-bold">{t.name}</CardTitle>
-                  <CardDescription className="text-emerald-300">{t.role}</CardDescription>
+                  <CardTitle className="text-base text-gray-200 font-medium">{t.name}</CardTitle>
+                  <CardDescription className="text-xs text-gray-400">{t.role}</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="flex mb-3">
                 {[...Array(5)].map((_, index) => (
-                  <Star key={index} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                  <Star key={index} className="h-3 w-3 text-gray-600 fill-gray-600" />
                 ))}
               </div>
-              <p className="text-gray-300 text-lg">{t.feedback}</p>
+              <p className="text-gray-400 text-sm leading-relaxed">{t.feedback}</p>
             </CardContent>
           </Card>
         ))}
@@ -81,27 +78,29 @@ export default function TestimonialSection() {
 
   // Reusable function to render skeleton loading cards
   const renderSkeletonCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[...Array(3)].map((_, i) => (
-        <Card key={i} className="bg-gray-700 border-indigo-900/20 shadow-xl">
-          <CardHeader>
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-10 w-10 rounded-full bg-indigo-600" />
+        <Card key={i} className="bg-gray-900/50 border-gray-800">
+          <CardHeader className="pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gray-800 animate-pulse"></div>
               <div>
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-16" />
+                <div className="h-4 w-20 bg-gray-800 rounded animate-pulse mb-1"></div>
+                <div className="h-3 w-16 bg-gray-800 rounded animate-pulse"></div>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="flex mb-3">
               {[...Array(5)].map((_, index) => (
-                <Star key={index} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                <Star key={index} className="h-3 w-3 text-gray-600 fill-gray-600" />
               ))}
             </div>
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full mt-2" />
-            <Skeleton className="h-4 w-2/3 mt-2" />
+            <div className="space-y-2">
+              <div className="h-3 w-full bg-gray-800 rounded animate-pulse"></div>
+              <div className="h-3 w-full bg-gray-800 rounded animate-pulse"></div>
+              <div className="h-3 w-2/3 bg-gray-800 rounded animate-pulse"></div>
+            </div>
           </CardContent>
         </Card>
       ))}
@@ -109,38 +108,44 @@ export default function TestimonialSection() {
   );
 
   return (
-    <section className="py-24 bg-gradient-to-t from-gray-900 to-indigo-950/40 text-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold">What Our Users Say</h2>
-          <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
+    <section className="py-20 bg-gray-950 text-gray-100">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-light mb-4 text-white">What Our Users Say</h2>
+          <div className="w-12 h-px bg-gray-600 mx-auto mb-6"></div>
+          <p className="text-gray-400 text-lg font-light max-w-2xl mx-auto mb-8">
             Join thousands of movie enthusiasts who have transformed how they discover films
           </p>
           
           {/* Write Testimonial Button */}
-          <div className="mt-8">
-            <Link href="/testimonials" passHref>
-              <Button 
-                className="h-10 bg-gradient-to-r from-pink-700 to-red-500 hover:from-pink-800 hover:to-red-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto"
-              >
-                <PenSquare className="h-4 w-4" />
-                Write Your Testimonial
-              </Button>
-            </Link>
-          </div>
-        </motion.div>
+          <Button 
+            className="bg-gray-800 hover:bg-gray-700 text-gray-100 font-light px-6 py-2 border border-gray-700 hover:border-gray-600 transition-all duration-200"
+          >
+            <Edit3 className="h-4 w-4 mr-2" />
+            Write Your Testimonial
+          </Button>
+        </div>
 
         <Tabs defaultValue="tab1" className="w-full">
-          <TabsList className="grid grid-cols-3 max-w-md mx-auto mb-12 text-black bg-cyan-900">
-            <TabsTrigger value="tab1">Film Lovers</TabsTrigger>
-            <TabsTrigger value="tab2">Casual Viewers</TabsTrigger>
-            <TabsTrigger value="tab3">Film Critics</TabsTrigger>
+          <TabsList className="grid grid-cols-3 max-w-md mx-auto mb-12 bg-gray-900 border border-gray-800">
+            <TabsTrigger 
+              value="tab1" 
+              className="text-gray-400 data-[state=active]:text-gray-100 data-[state=active]:bg-gray-800 font-light"
+            >
+              Film Lovers
+            </TabsTrigger>
+            <TabsTrigger 
+              value="tab2" 
+              className="text-gray-400 data-[state=active]:text-gray-100 data-[state=active]:bg-gray-800 font-light"
+            >
+              Casual Viewers
+            </TabsTrigger>
+            <TabsTrigger 
+              value="tab3" 
+              className="text-gray-400 data-[state=active]:text-gray-100 data-[state=active]:bg-gray-800 font-light"
+            >
+              Film Critics
+            </TabsTrigger>
           </TabsList>
 
           {/* Film Lovers Testimonials */}

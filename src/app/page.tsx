@@ -68,80 +68,81 @@ export default function Home() {
   return (
     <main className="bg-gradient-to-l from-red-900 to-blue-900 text-white">
       
-      <section className="relative h-[600px] w-full flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-indigo-950/60">
-      
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          className="z-10 text-center px-6 max-w-4xl mx-auto space-y-6"
+      <section className="relative h-[600px] w-full flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-950 to-slate-900">
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 1 }}
+    className="z-10 text-center px-6 max-w-4xl mx-auto space-y-6"
+  >
+    <motion.h1
+      className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-gray-100"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4, duration: 0.8 }}
+    >
+      Discover Your Next Favorite
+      <span className="block text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-slate-400 mt-2">
+        MOVIE
+      </span>
+    </motion.h1>
+
+    <motion.p
+      className="text-lg text-gray-400 max-w-2xl mx-auto"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.8, duration: 0.8 }}
+    >
+      MovieQuest's AI-powered platform helps you discover perfect movies based on your taste,
+      mood, and available streaming services.
+    </motion.p>
+
+    <motion.div
+      className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1, duration: 0.8 }}
+    >
+      <Link href="/search" passHref>
+        <Button
+          size="lg"
+          className="px-8 py-6 rounded-full text-lg font-medium bg-indigo-700 hover:bg-indigo-600 transition-all shadow-md hover:shadow-lg text-white"
         >
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-          </motion.div>
-
-          <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
-            Discover Your Next Favorite
-            <span className="block text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400 mt-2">
-              MOVIE
-            </span>
-          </motion.h1>
-
-          <motion.p
-            className="text-lg text-gray-300 max-w-2xl mx-auto "
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-          >
-            MovieQuest's AI-powered platform helps you discover perfect movies based on your taste,
-            mood, and available streaming services.
-          </motion.p>
-
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center "
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.8 }}
-          >
-            <Link href="/search" passHref>
-              <Button size="lg" className="px-8 py-6 rounded-full text-lg font-medium bg-indigo-600 hover:bg-indigo-700 hover:scale-105 transition-all shadow-lg">
-                <Search className="mr-2 h-5 w-5" /> Explore Movies
-              </Button>
-            </Link>
-            <Link href="/genres" passHref>
-              <Button variant="outline" size="lg" className="px-8 py-6 rounded-full text-lg font-medium bg-gray-800 text-white border-white/20 hover:bg-green-500 hover:border-white/40 transition-all">
-                <Film className="mr-2 h-5 w-5" /> Browse Genres
-              </Button>
-            </Link>
-          </motion.div>
-        </motion.div>
-
-        <motion.div 
-          className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+          <Search className="mr-2 h-5 w-5" /> Explore Movies
+        </Button>
+      </Link>
+      <Link href="/genres" passHref>
+        <Button
+          variant="outline"
+          size="lg"
+          className="px-8 py-6 rounded-full text-lg font-medium bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-gray-400 transition-all"
         >
-          <svg width="24" height="40" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="22" height="38" rx="11" stroke="white" strokeOpacity="0.3" strokeWidth="2"/>
-            <motion.circle 
-              cx="12" 
-              cy="12" 
-              r="6" 
-              fill="white"
-              animate={{ y: [0, 15, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            />
-          </svg>
-        </motion.div>
-      </section>
+          <Film className="mr-2 h-5 w-5" /> Browse Genres
+        </Button>
+      </Link>
+    </motion.div>
+  </motion.div>
+
+  <motion.div
+    className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+    animate={{ y: [0, 10, 0] }}
+    transition={{ repeat: Infinity, duration: 2 }}
+  >
+    <svg width="24" height="40" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="22" height="38" rx="11" stroke="white" strokeOpacity="0.15" strokeWidth="2" />
+      <motion.circle
+        cx="12"
+        cy="12"
+        r="6"
+        fill="white"
+        fillOpacity="0.6"
+        animate={{ y: [0, 15, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      />
+    </svg>
+  </motion.div>
+</section>
+
 
       <section className="py-20 bg-gradient-to-b from-gray-900 to-indigo-950/40">
         <div className="max-w-7xl mx-auto px-6">
@@ -215,41 +216,31 @@ export default function Home() {
 
       <TestimonialSection/>
 
-      <section className="py-24 bg-gradient-to-b from-indigo-950 to-gray-900 text-white">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="space-y-8"
-          >
-            <h2 className="text-4xl sm:text-5xl font-bold">Ready to Transform Your Movie Experience?</h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Join thousands of film enthusiasts who have discovered their perfect next watch with MovieQuest
-            </p>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link href="/search" passHref>
-                    <Button size="lg" className="mt-8 px-12 py-7 rounded-full text-xl font-medium bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-900/30 hover:shadow-indigo-800/40 transition-all hover:scale-105">
-                      Start Exploring Now
-                    </Button>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>No sign-up required to start!</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <p className="text-sm text-gray-400 mt-6">
-              No credit card required. Begin discovering movies instantly.
-            </p>
-          </motion.div>
+      <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-950 text-white">
+      <div className="max-w-5xl mx-auto px-6 text-center">
+        <div className="space-y-8">
+          <h2 className="text-4xl sm:text-5xl font-light">Ready to Transform Your Movie Experience?</h2>
+          <div className="w-16 h-px bg-gray-600 mx-auto"></div>
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto font-light">
+            Join thousands of film enthusiasts who have discovered their perfect next watch with MovieQuest
+          </p>
+          
+          <div className="pt-4">
+            <Button 
+              size="lg" 
+              className="px-12 py-6 text-lg font-light bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:scale-105"
+              onClick={() => window.location.href = "/search"}
+            >
+              Start Exploring Now
+            </Button>
+          </div>
+          
+          <p className="text-sm text-gray-500 mt-6 font-light">
+            No credit card required. Begin discovering movies instantly.
+          </p>
         </div>
-      </section>
+      </div>
+    </section>
     </main>
   );
 }
