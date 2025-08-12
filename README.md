@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# 🎬 MovieQuest
 
-First, run the development server:
+MovieQuest is a modern, responsive, and high-performance movie discovery platform built with Next.js and TypeScript. It uses the TMDB API to let users explore movies by genre, popularity, trending status, and ratings — all in a sleek dark-themed UI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+![image](https://github.com/user-attachments/assets/9fef2873-d5ee-48f6-880f-4b97c4c01a4e)
+
+
+## 🚀 Live Demo
+
+👉 [movies-quest.vercel.app](https://movies-quest.vercel.app)
+
+---
+
+## 🌟 Features
+
+- 🔍 **Search Movies** by title with autocomplete support
+- 📊 **Filter** by Trending, Popular, and Top Rated
+- 🎭 **Browse by Genre** dynamically
+- 🎥 **Detailed Movie Pages** with ratings, overviews, release date, and more
+- 💡 **Responsive Design** optimized for mobile, tablet, and desktop
+- ⚙️ **Performance Optimized** with lazy loading, code splitting, and image optimization
+- 🧩 **Error Handling** for API and routing edge cases
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** [Next.js](https://nextjs.org/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **API:** [TMDB API](https://www.themoviedb.org/documentation/api)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Icons:** [Lucide](https://lucide.dev/)
+- **Font Optimization:** `next/font`
+- **Deployment:** [Vercel](https://vercel.com)
+
+---
+
+## 📁 Folder Structure
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+MovieQuest/
+├── public/             # Static assets
+├── src/
+│   ├── app/            # App Router pages
+│   ├── components/     # Reusable UI components
+│   ├── lib/            # API utilities, constants
+├── next.config.ts      # Next.js config
+├── postcss.config.mjs  # Tailwind/PostCSS config
+├── tsconfig.json       # TypeScript config
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+````
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🧪 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+To run the project locally:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Clone the repo
+git clone https://github.com/Shinkhal/MovieQuest.git
+cd MovieQuest
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Install dependencies
+npm install
 
-## Deploy on Vercel
+# Add your TMDB API key in environment variables
+touch .env.local
+# Add: NEXT_PUBLIC_TMDB_API_KEY=your_api_key_here
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Run the app
+npm run dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Open http://localhost:3000 in your browser
+````
+
+---
+
+## 📦 Environment Variables
+
+Create a `.env.local` file in the root directory and add:
+
+```env
+NEXT_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
+```
+
+Get your API key from [The Movie Database](https://www.themoviedb.org/documentation/api).
+
+---
+
+## ✨ Future Improvements
+
+* 🔐 Add user authentication (favorites, watchlist)
+* 📽️ Integrate trailers with YouTube embeds
+* 📱 Convert to PWA for offline support
+* 🧠 Add AI-powered recommendations
+
+---
+
+## 🙌 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you’d like to change.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 💬 Connect with Me
+
+Created with 💙 by [Shinkhal Sinha](https://shinkhal-sinha.online)
+
+
