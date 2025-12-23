@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import TestimonialSection from "@/components/Testimonials";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Snowfall from 'react-snowfall';
 
 export default function Home() {
  
@@ -67,8 +68,9 @@ export default function Home() {
 
   return (
     <main className="bg-gradient-to-l from-red-900 to-blue-900 text-white">
-      
+      <Snowfall/>
       <section className="relative h-[600px] w-full flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-950 to-slate-900">
+      <Snowfall/>
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
