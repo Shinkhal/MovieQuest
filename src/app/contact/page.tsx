@@ -11,40 +11,43 @@ import { Mail, Phone, MapPin, Send } from "lucide-react";
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.target);
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          access_key: process.env.NEXT_PUBLIC_FORM_KEY,
-          name: formData.get("name"),
-          email: formData.get("email"),
-          message: formData.get("message"),
-        }),
-      });
+  const form = e.currentTarget;
+  const formData = new FormData(form);
 
-      const result = await response.json();
-      
-      if (result.success) {
-        alert("Thank you for contacting us!");
-        e.target.reset();
-      } else {
-        alert("Something went wrong. Please try again.");
-      }
-    } catch (error) {
+  try {
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        access_key: process.env.NEXT_PUBLIC_FORM_KEY,
+        name: formData.get("name"),
+        email: formData.get("email"),
+        message: formData.get("message"),
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Thank you for contacting us!");
+      form.reset();
+    } else {
       alert("Something went wrong. Please try again.");
     }
-    
-    setLoading(false);
+  } catch (error) {
+    alert("Something went wrong. Please try again.");
   }
+
+  setLoading(false);
+}
+
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
