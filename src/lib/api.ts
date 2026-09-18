@@ -14,6 +14,14 @@ async function fetchFromTmdb<T>(url: string): Promise<T> {
   return data;
 }
 
+/** Server-side function to fetch genres (for SSR/SSG) */
+export async function getGenresServer(): Promise<Genre[]> {
+  const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const url = `https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}`;
+  const { data } = await axios.get<{ genres: Genre[] }>(url);
+  return data.genres;
+}
+
 /** Hook to get a list of genres */
 export function useGenres() {
   return useQuery<Genre[]>({
@@ -39,10 +47,10 @@ export function useMovies(params: {
       ? `https://api.themoviedb.org/3/trending/movie/week&page=${page}`
       : `https://api.themoviedb.org/3/search/movie&query=${encodeURIComponent(query)}&page=${page}`;
 
-  return useQuery<{ results: Movie[]; total_pages: number }>({
+  return useQuery<{ results: Movie[]; total_pages: number }, Error, { results: Movie[]; total_pages: number }>({
     queryKey: ['movies', type, query, page, sortBy],
-    queryFn: () => fetchFromTmdb(endpoint),
-    keepPreviousData: true,
+    queryFn: () => fetchFromTmdb<{ results: Movie[]; total_pages: number }>(endpoint),
+    placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

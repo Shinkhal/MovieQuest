@@ -66,6 +66,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from 'next-themes';
+import { QueryProvider } from '@/components/QueryProvider';
 
 export default function RootLayout({
   children,
@@ -76,10 +77,12 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
-          {children}
-          <Toaster richColors position="bottom-right" />
-          <Footer />
+          <QueryProvider>
+            <Navbar />
+            {children}
+            <Toaster richColors position="bottom-right" />
+            <Footer />
+          </QueryProvider>
         </ThemeProvider>
         <script
           type="application/ld+json"

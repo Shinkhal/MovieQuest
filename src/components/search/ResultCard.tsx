@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star } from 'lucide-react';
+import { Star, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Movie } from '@/types/api';
 import Image from 'next/image';
