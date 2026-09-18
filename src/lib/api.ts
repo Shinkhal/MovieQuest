@@ -18,8 +18,28 @@ async function fetchFromTmdb<T>(url: string): Promise<T> {
 export async function getGenresServer(): Promise<Genre[]> {
   const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const url = `https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}`;
-  const { data } = await axios.get<{ genres: Genre[] }>(url);
-  return data.genres;
+
+  // Retry logic for transient network errors
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const { data } = await axios.get<{ genres: Genre[] }>(url, {
+        timeout: 10000,
+      });
+      return data.genres;
+    } catch (error) {
+      lastError = error as Error;
+      if (attempt < 3) {
+        // Wait before retry (exponential backoff)
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+  }
+
+  // If all retries fail, return empty array instead of throwing
+  // This allows the page to render with a fallback
+  console.error('Failed to fetch genres after retries:', lastError);
+  return [];
 }
 
 /** Hook to get a list of genres */
