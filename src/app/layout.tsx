@@ -65,6 +65,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from 'next-themes';
+
 export default function RootLayout({
   children,
 }: {
@@ -73,10 +75,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Navbar />
-        {children}
-        <Toaster richColors position="bottom-right" />
-        <Footer />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Navbar />
+          {children}
+          <Toaster richColors position="bottom-right" />
+          <Footer />
+        </ThemeProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
