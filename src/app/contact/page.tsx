@@ -1,62 +1,70 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Send, AlertCircle, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  const form = e.currentTarget;
-  const formData = new FormData(form);
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: process.env.NEXT_PUBLIC_FORM_KEY,
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      });
 
-  try {
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        access_key: process.env.NEXT_PUBLIC_FORM_KEY,
-        name: formData.get("name"),
-        email: formData.get("email"),
-        message: formData.get("message"),
-      }),
-    });
+      const result = await response.json();
 
-    const result = await response.json();
-
-    if (result.success) {
-      alert("Thank you for contacting us!");
-      form.reset();
-    } else {
-      alert("Something went wrong. Please try again.");
+      if (result.success) {
+        toast.success("Thank you for contacting us!");
+        setFormData({ name: '', email: '', message: '' });
+        e.currentTarget.reset();
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
     }
-  } catch (error) {
-    alert("Something went wrong. Please try again.");
+
+    setLoading(false);
   }
 
-  setLoading(false);
-}
-
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-light mb-4 text-white">Contact</h1>
-          <div className="w-12 h-px bg-gray-600 mx-auto mb-6"></div>
-          <p className="text-gray-400 text-lg font-light max-w-2xl mx-auto">
+          <h1 className="text-4xl font-light mb-4 text-foreground">Contact</h1>
+          <div className="w-12 h-px bg-muted mx-auto mb-6"></div>
+          <p className="text-muted-foreground text-lg font-light max-w-2xl mx-auto">
             Have a question or want to work together? I'd love to hear from you.
           </p>
         </div>
@@ -65,67 +73,77 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-3 gap-16">
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-8">
-            <div className="space-y-6">
-              <div className="group">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                    <Mail className="w-4 h-4 text-gray-400" />
+            <Card className="bg-muted/30 border border-muted/20">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">Get in Touch</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Feel free to reach out through any of these channels
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-200">Email</h3>
+                    <h3 className="font-medium text-foreground">Email</h3>
+                    <p className="text-muted-foreground text-sm">shinkhalsinha@gmail.com</p>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm ml-14">shinkhalsinha@gmail.com</p>
-              </div>
 
-              <div className="group">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                    <Phone className="w-4 h-4 text-gray-400" />
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-200">Phone</h3>
+                    <h3 className="font-medium text-foreground">Phone</h3>
+                    <p className="text-muted-foreground text-sm">+91 9431063696</p>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm ml-14">+91 9431063696</p>
-              </div>
 
-              <div className="group">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                    <MapPin className="w-4 h-4 text-gray-400" />
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-200">Location</h3>
+                    <h3 className="font-medium text-foreground">Location</h3>
+                    <p className="text-muted-foreground text-sm">Jalandhar, Punjab, India</p>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm ml-14">Jalandhar, Punjab, India</p>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-gray-900/50 border-gray-800 shadow-2xl">
+            <Card className="bg-muted/30 border border-muted/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-xl font-medium">Send a Message</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Fill out the form below and I'll get back to you as soon as possible.
+                </CardDescription>
+              </CardHeader>
               <CardContent className="p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Name Field */}
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-gray-300 font-light">
+                    <Label htmlFor="name" className="text-sm font-medium text-foreground">
                       Name
                     </Label>
                     <Input
                       id="name"
                       name="name"
                       placeholder="Your name"
+                      value={formData.name}
+                      onChange={handleChange}
                       required
-                      className="bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-gray-600 focus:ring-0 transition-colors"
+                      className="bg-background border-muted focus:border-primary"
                     />
                   </div>
 
                   {/* Email Field */}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-300 font-light">
+                    <Label htmlFor="email" className="text-sm font-medium text-foreground">
                       Email
                     </Label>
                     <Input
@@ -133,14 +151,16 @@ export default function ContactPage() {
                       name="email"
                       type="email"
                       placeholder="your.email@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
                       required
-                      className="bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-gray-600 focus:ring-0 transition-colors"
+                      className="bg-background border-muted focus:border-primary"
                     />
                   </div>
 
                   {/* Message Field */}
                   <div className="space-y-2">
-                    <Label htmlFor="message" className="text-gray-300 font-light">
+                    <Label htmlFor="message" className="text-sm font-medium text-foreground">
                       Message
                     </Label>
                     <Textarea
@@ -148,8 +168,10 @@ export default function ContactPage() {
                       name="message"
                       placeholder="Tell me about your project or inquiry..."
                       rows={6}
+                      value={formData.message}
+                      onChange={handleChange}
                       required
-                      className="bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-gray-600 focus:ring-0 transition-colors resize-none"
+                      className="bg-background border-muted focus:border-primary resize-none"
                     />
                   </div>
 
@@ -157,15 +179,15 @@ export default function ContactPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gray-800 hover:bg-gray-700 text-gray-100 font-light py-3 transition-all duration-200 border border-gray-700 hover:border-gray-600"
+                    className="w-full bg-primary hover:bg-primary/80 text-primary-foreground py-3"
                   >
                     {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-transparent rounded-full animate-spin"></div>
                         Sending...
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2">
                         <Send className="w-4 h-4" />
                         Send Message
                       </div>
