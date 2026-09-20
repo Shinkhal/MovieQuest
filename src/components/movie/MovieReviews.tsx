@@ -140,9 +140,9 @@ export function MovieReviews({
               </CardTitle>
             </CardHeader>
 
-            <form onSubmit={handleSubmit} className="p-0 pt-4 space-y-4">
-              {/* Signed-in user badge or guest input */}
-              {session?.user ? (
+            {session?.user ? (
+              <form onSubmit={handleSubmit} className="p-0 pt-4 space-y-4">
+                {/* Signed-in user badge */}
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
                   <div className="relative w-8 h-8 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
                     {session.user.image ? (
@@ -161,83 +161,74 @@ export function MovieReviews({
                     <p className="text-muted-foreground text-[10px]">Verified Member</p>
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="guestName" className="text-xs font-semibold text-muted-foreground">
-                      Your Name
-                    </Label>
-                    <button
-                      type="button"
-                      onClick={() => signIn()}
-                      className="text-xs text-primary font-semibold hover:underline"
-                    >
-                      Sign In with Google
-                    </button>
+
+                {/* Interactive Star Rating Selector */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground">
+                    Your Rating: {hoverRating || rating} / 5 Stars
+                  </Label>
+                  <div className="flex items-center gap-1 text-amber-500 pt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="p-1 hover:scale-125 transition-transform"
+                        aria-label={`Rate ${star} star`}
+                      >
+                        <Star
+                          className={`h-6 w-6 ${
+                            star <= (hoverRating || rating)
+                              ? 'fill-current'
+                              : 'opacity-30'
+                          }`}
+                        />
+                      </button>
+                    ))}
                   </div>
-                  <Input
-                    id="guestName"
-                    placeholder="e.g. Alex Morgan"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    className="rounded-xl bg-background/60 border-border/80"
+                </div>
+
+                {/* Comment text area */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="comment" className="text-xs font-semibold text-muted-foreground">
+                    Your Thoughts on the Film *
+                  </Label>
+                  <Textarea
+                    id="comment"
+                    placeholder="What made this film special? Direction, acting, cinematography, plot twists..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    rows={4}
+                    required
+                    className="rounded-xl bg-background/60 border-border/80 resize-none text-xs sm:text-sm"
                   />
                 </div>
-              )}
 
-              {/* Interactive Star Rating Selector */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Your Rating: {hoverRating || rating} / 5 Stars
-                </Label>
-                <div className="flex items-center gap-1 text-amber-500 pt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      className="p-1 hover:scale-125 transition-transform"
-                      aria-label={`Rate ${star} star`}
-                    >
-                      <Star
-                        className={`h-6 w-6 ${
-                          star <= (hoverRating || rating)
-                            ? 'fill-current'
-                            : 'opacity-30'
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full py-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm shadow-md gap-2"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  {submitting ? 'Publishing...' : 'Publish Review'}
+                </Button>
+              </form>
+            ) : (
+              <div className="p-0 pt-4 space-y-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Sign in to share your thoughts and rate this film.
+                </p>
+                <Button
+                  onClick={() => signIn()}
+                  className="w-full py-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm shadow-md gap-2"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  Sign In to Review
+                </Button>
               </div>
-
-              {/* Comment text area */}
-              <div className="space-y-1.5">
-                <Label htmlFor="comment" className="text-xs font-semibold text-muted-foreground">
-                  Your Thoughts on the Film *
-                </Label>
-                <Textarea
-                  id="comment"
-                  placeholder="What made this film special? Direction, acting, cinematography, plot twists..."
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  rows={4}
-                  required
-                  className="rounded-xl bg-background/60 border-border/80 resize-none text-xs sm:text-sm"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm shadow-md gap-2"
-              >
-                <Send className="h-3.5 w-3.5" />
-                {submitting ? 'Publishing...' : 'Publish Review'}
-              </Button>
-            </form>
+            )}
           </Card>
         </div>
 

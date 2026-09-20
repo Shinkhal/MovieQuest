@@ -9,6 +9,7 @@ import { Movie } from '@/types/api';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWatchlist } from '@/hooks/useWatchlist';
+import { useSession, signIn } from 'next-auth/react';
 import { toast } from 'sonner';
 
 // Standard TMDB genre ID map for fast fallback lookups
@@ -35,6 +36,7 @@ const GENRE_MAP: Record<number, string> = {
 };
 
 export function ResultCard({ movie }: { movie: Movie }) {
+  const { data: session } = useSession();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
   const isBookmarked = isInWatchlist(movie.id);
 
@@ -45,6 +47,10 @@ export function ResultCard({ movie }: { movie: Movie }) {
   const handleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!session?.user) {
+      signIn(undefined, { callbackUrl: `/movie/${movie.id}` });
+      return;
+    }
     const added = toggleWatchlist(movie);
     if (added) {
       toast.success(`"${movie.title}" added to your Watchlist`);

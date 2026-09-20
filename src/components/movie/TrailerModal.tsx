@@ -34,6 +34,7 @@ export function TrailerModal({ isOpen, onClose, trailerKey }: TrailerModalProps)
           onClick={onClose}
           variant="ghost"
           size="icon"
+          aria-label="Close trailer"
           className="absolute -top-12 right-0 bg-background/80 hover:bg-background"
         >
           <X className="h-5 w-5" />

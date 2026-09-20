@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const WatchlistSchema = new mongoose.Schema(
   {
-    userId: { type: String, required: true, index: true },
+    userId: { type: String, required: true, unique: true, index: true },
     userEmail: { type: String },
     movies: [
       {
@@ -22,3 +22,4 @@ const WatchlistSchema = new mongoose.Schema(
 );
 
 export default mongoose.models.Watchlist || mongoose.model("Watchlist", WatchlistSchema);
+

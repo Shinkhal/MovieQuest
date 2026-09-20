@@ -2,9 +2,10 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Play, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Play, Bookmark, BookmarkCheck, LogIn } from 'lucide-react';
 import { Movie } from '@/types/api';
 import { useWatchlist } from '@/hooks/useWatchlist';
+import { useSession, signIn } from 'next-auth/react';
 import { toast } from 'sonner';
 
 interface PosterSectionProps {
@@ -13,6 +14,7 @@ interface PosterSectionProps {
 }
 
 export function PosterSection({ movie, trailerKey }: PosterSectionProps) {
+  const { data: session } = useSession();
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
   const isBookmarked = isInWatchlist(movie.id);
 
@@ -23,6 +25,10 @@ export function PosterSection({ movie, trailerKey }: PosterSectionProps) {
   };
 
   const handleToggleWatchlist = () => {
+    if (!session?.user) {
+      signIn(undefined, { callbackUrl: `/movie/${movie.id}` });
+      return;
+    }
     const added = toggleWatchlist(movie);
     if (added) {
       toast.success(`"${movie.title}" added to your Watchlist`);
@@ -72,7 +78,12 @@ export function PosterSection({ movie, trailerKey }: PosterSectionProps) {
           className="w-full py-5 rounded-xl border-border/80 font-medium text-xs sm:text-sm gap-2 transition-all hover:bg-muted"
           onClick={handleToggleWatchlist}
         >
-          {isBookmarked ? (
+          {!session?.user ? (
+            <>
+              <LogIn className="h-4 w-4 text-muted-foreground" />
+              Sign In to Save
+            </>
+          ) : isBookmarked ? (
             <>
               <BookmarkCheck className="h-4 w-4 text-primary fill-primary/20" />
               In Watchlist

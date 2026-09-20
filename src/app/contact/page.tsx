@@ -23,6 +23,12 @@ export default function ContactPage() {
     setLoading(true);
 
     try {
+      const formKey = process.env.NEXT_PUBLIC_FORM_KEY;
+      if (!formKey) {
+        toast.error('Contact form is not configured. Please email shinkhalsinha@gmail.com directly.');
+        return;
+      }
+
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
@@ -30,7 +36,7 @@ export default function ContactPage() {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          access_key: process.env.NEXT_PUBLIC_FORM_KEY || 'sandbox_key',
+          access_key: formKey,
           name: formData.name,
           email: formData.email,
           subject: formData.subject || 'MovieQuest Inquiry',

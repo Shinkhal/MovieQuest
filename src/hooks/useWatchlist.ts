@@ -65,18 +65,40 @@ export function useWatchlist() {
   const { data: cloudList = [], isLoading: isCloudLoading } = useQuery<Movie[]>({
     queryKey: ['cloud-watchlist', session?.user?.id || session?.user?.email],
     queryFn: async () => {
+      // Gather items from the user-scoped local key
       const local = getLocalWatchlist(storageKey);
-      if (local.length > 0) {
-        // Sync local to cloud on first fetch
-        const { data } = await axios.post('/api/watchlist', { syncList: local });
+
+      // Also migrate any items saved under the generic guest key (pre-login)
+      const guestKey = 'moviequest_watchlist_guest';
+      const guestItems = storageKey !== guestKey ? getLocalWatchlist(guestKey) : [];
+      const mergedLocal = [...local];
+      const localIds = new Set(mergedLocal.map((m) => m.id));
+      for (const g of guestItems) {
+        if (!localIds.has(g.id)) {
+          mergedLocal.push(g);
+          localIds.add(g.id);
+        }
+      }
+
+      if (mergedLocal.length > 0) {
+        // Sync local + guest to cloud on first fetch
+        const { data } = await axios.post('/api/watchlist', { syncList: mergedLocal });
         if (data?.movies) {
           setLocalWatchlist(storageKey, data.movies);
+          // Clear migrated guest items
+          if (guestItems.length > 0 && typeof window !== 'undefined') {
+            localStorage.removeItem(guestKey);
+          }
           return data.movies;
         }
       }
       const { data } = await axios.get('/api/watchlist');
       if (data?.movies) {
         setLocalWatchlist(storageKey, data.movies);
+        // Clear migrated guest items
+        if (guestItems.length > 0 && typeof window !== 'undefined') {
+          localStorage.removeItem(guestKey);
+        }
         return data.movies;
       }
       return [];

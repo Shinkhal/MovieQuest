@@ -39,7 +39,11 @@ MovieQuest is a modern, responsive, and high-performance movie discovery platfor
 
 ## 📦 Environment Variables
 
-Create a `.env.local` file in the root directory and configure the following variables:
+Create a `.env.local` file by copying the included template, then fill in your credentials:
+
+```bash
+cp .env.example .env.local
+```
 
 ```env
 # TMDB API
@@ -48,13 +52,16 @@ NEXT_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
 # MongoDB Database Connection (Server-only; MUST NOT be prefixed with NEXT_PUBLIC_)
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/moviequest?retryWrites=true&w=majority
 
-# Auth.js / NextAuth Configuration (Required in production)
+# Auth.js / NextAuth Configuration (Required in production — generate with: openssl rand -base64 32)
 AUTH_SECRET=your_generated_auth_secret_key
 AUTH_URL=https://movies-quest.vercel.app
 
-# Google OAuth Credentials (AUTH_GOOGLE_ID or GOOGLE_CLIENT_ID or CLIENT_ID)
+# Google OAuth Credentials (optional — guest login works without these)
 AUTH_GOOGLE_ID=your_google_oauth_client_id.apps.googleusercontent.com
 AUTH_GOOGLE_SECRET=your_google_oauth_client_secret
+
+# Web3Forms Contact Form Key (required for /contact form delivery)
+NEXT_PUBLIC_FORM_KEY=your_web3forms_access_key
 
 # Optional Application URL
 NEXT_PUBLIC_APP_URL=https://movies-quest.vercel.app

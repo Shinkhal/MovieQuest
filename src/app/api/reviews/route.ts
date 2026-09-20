@@ -27,8 +27,12 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Authentication required to submit reviews' }, { status: 401 });
+    }
+
     const body = await req.json();
-    const { movieId, movieTitle, rating, comment, userName: customName } = body;
+    const { movieId, movieTitle, rating, comment } = body;
 
     const numRating = Number(rating);
     if (!movieId || isNaN(numRating) || numRating < 1 || numRating > 5) {
@@ -48,12 +52,12 @@ export async function POST(req: Request) {
 
     await connectToDatabase();
 
-    const userName = session?.user?.name || (typeof customName === 'string' && customName.trim()) || 'Anonymous Cinephile';
-    const userEmail = session?.user?.email || '';
+    const userName = session.user.name || 'Cinephile';
+    const userEmail = session.user.email || '';
     const userAvatar =
-      session?.user?.image ||
+      session.user.image ||
       (userName ? userName.charAt(0).toUpperCase() : 'C');
-    const userId = session?.user?.id || session?.user?.email || `anon_${Date.now()}`;
+    const userId = session.user.id || session.user.email;
 
     const newReview = await Review.create({
       movieId: Number(movieId),
