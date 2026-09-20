@@ -4,6 +4,9 @@ import "./globals.css";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "sonner";
+import { ThemeProvider } from 'next-themes';
+import { QueryProvider } from '@/components/QueryProvider';
+import { AuthProvider } from '@/components/AuthProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s | MovieQuest",
   },
   description:
-    "Discover, explore and share your favorite movies with MovieQuest - your personalized film recommendation platform.",
+    "Discover, explore and share your favorite movies with MovieQuest - your personalized film recommendation and streaming platform.",
   keywords: [
     "movies",
     "film recommendations",
@@ -31,26 +34,19 @@ export const metadata: Metadata = {
     "cinema",
     "movie discovery",
     "film ratings",
+    "streaming guide",
   ],
   authors: [{ name: "Shinkhal Sinha" }],
   creator: "MovieQuest",
-  metadataBase: new URL("https://moviequest.example.com"),
+  metadataBase: new URL("https://movies-quest.vercel.app"),
   openGraph: {
     title: "MovieQuest | Find Your Next Favorite Film",
     description:
       "Discover, explore and share your favorite movies with MovieQuest - your personalized film recommendation platform.",
-    url: "https://moviequest.example.com",
+    url: "https://movies-quest.vercel.app",
     siteName: "MovieQuest",
     type: "website",
     locale: "en_US",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "MovieQuest - Find Your Next Favorite Film",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -65,24 +61,23 @@ export const metadata: Metadata = {
   },
 };
 
-import { ThemeProvider } from 'next-themes';
-import { QueryProvider } from '@/components/QueryProvider';
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <QueryProvider>
-            <Navbar />
-            {children}
-            <Toaster richColors position="bottom-right" />
-            <Footer />
-          </QueryProvider>
+          <AuthProvider>
+            <QueryProvider>
+              <Navbar />
+              {children}
+              <Toaster richColors position="bottom-right" />
+              <Footer />
+            </QueryProvider>
+          </AuthProvider>
         </ThemeProvider>
         <script
           type="application/ld+json"
@@ -91,10 +86,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "MovieQuest",
-              url: "https://moviequest.example.com",
+              url: "https://movies-quest.vercel.app",
               potentialAction: {
                 "@type": "SearchAction",
-                target: "https://moviequest.example.com/search?q={search_term_string}",
+                target: "https://movies-quest.vercel.app/search?q={search_term_string}",
                 "query-input": "required name=search_term_string",
               },
             }),

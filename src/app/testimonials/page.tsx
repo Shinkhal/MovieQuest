@@ -2,21 +2,25 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import axios from 'axios';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { MessageSquare, Star, Sparkles, Send } from "lucide-react";
+import TestimonialSection from "@/components/Testimonials";
+import { useSubmitTestimonial } from "@/lib/testimonial-api";
 
-export default function TestimonialForm() {
+export default function TestimonialsPage() {
   const [form, setForm] = useState({
     name: '',
     role: '',
     feedback: '',
     avatar: '',
   });
-  const [loading, setLoading] = useState(false);
+
+  const submitMutation = useSubmitTestimonial();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -30,7 +34,7 @@ export default function TestimonialForm() {
   const handleRoleChange = (value: string) => {
     setForm((prev) => ({
       ...prev,
-      role: value
+      role: value,
     }));
   };
 
@@ -42,80 +46,120 @@ export default function TestimonialForm() {
       return;
     }
 
-    setLoading(true);
     try {
-      await axios.post('/api/testimonials', form);
-      toast.success('Testimonial submitted successfully!');
+      await submitMutation.mutateAsync({
+        name: form.name,
+        role: form.role,
+        feedback: form.feedback,
+        avatar: form.avatar || form.name.charAt(0).toUpperCase(),
+      });
+      toast.success('Thank you for sharing your feedback!');
       setForm({ name: '', role: '', feedback: '', avatar: '' });
     } catch (error) {
       toast.error('Failed to submit testimonial. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-svh bg-gradient-to-t from-gray-500 to-gray-800 flex items-center justify-center p-6">
-      <div className="w-full max-w-lg shadow-2xl transition duration-300 backdrop-blur-lg border border-white/30 rounded-xl overflow-hidden">
-        <div className="bg-gradient-to-b from-red-500 to-pink-800 text-white p-6 ">
-          <h2 className="text-2xl font-bold">Share Your Feedback</h2>
-          <p className="text-indigo-200 mt-1">Your testimonial helps others make informed decisions</p>
+    <main className="min-h-screen bg-background text-foreground pb-20">
+      {/* Header */}
+      <section className="relative py-16 px-4 border-b border-border/40 bg-gradient-to-b from-primary/10 via-background to-background">
+        <div className="max-w-4xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+            <MessageSquare className="h-3.5 w-3.5" />
+            Community Voice
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
+            User <span className="text-primary">Reviews & Feedback</span>
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
+            See what cinephiles and casual moviegoers have to say about MovieQuest.
+          </p>
         </div>
-        
-        <div className="p-6 space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-gray-100">Full Name <span className="text-red-400">*</span></Label>
-              <Input
-                id="name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Your name"
-                className="bg-gray-700 border-gray-600 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="role" className="text-sm font-medium text-gray-100">Your Role <span className="text-red-400">*</span></Label>
-              <Select value={form.role} onValueChange={handleRoleChange} >
-                <SelectTrigger className=" border-gray-600 w-full text-white focus:ring-2 focus:ring-indigo-500">
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-600 border-gray-600 text-white w-full">
-                  <SelectItem value="Film Lover">Film Lover</SelectItem>
-                  <SelectItem value="Casual Viewer">Casual Viewer</SelectItem>
-                  <SelectItem value="Film Critic">Film Critic</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="feedback" className="text-sm font-medium text-gray-100">Your Testimonial <span className="text-red-400">*</span></Label>
-              <Textarea
-                id="feedback"
-                name="feedback"
-                value={form.feedback}
-                onChange={handleChange}
-                placeholder="Please share your experience..."
-                rows={5}
-                className="bg-gray-700 border-gray-600 text-white resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-          </form>
-        </div>
-        
-        <div className="bg-gray-850 border-t border-gray-700 px-6 py-4 flex justify-end">
-          <Button 
-            type="submit" 
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-indigo-700 text-white font-medium px-6"
-          >
-            {loading ? 'Submitting...' : 'Submit Testimonial'}
-          </Button>
-        </div>
+      </section>
+
+      {/* Testimonials Wall Showcase */}
+      <div className="pt-8">
+        <TestimonialSection />
       </div>
-    </div>
+
+      {/* Submit Testimonial Card */}
+      <section className="max-w-2xl mx-auto px-4 sm:px-6 pt-12">
+        <Card className="rounded-2xl border border-border/70 bg-card/70 backdrop-blur-md shadow-xl overflow-hidden">
+          <CardHeader className="border-b border-border/40 bg-muted/20 pb-6">
+            <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Leave Your Testimonial
+            </CardTitle>
+            <CardDescription className="text-xs sm:text-sm text-muted-foreground">
+              Help us improve MovieQuest by sharing your thoughts and favorite features.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Your Full Name
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="e.g. Alex Morgan"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  className="rounded-xl bg-background/60 border-border/80"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="role" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Your Role / Profile
+                </Label>
+                <Select onValueChange={handleRoleChange} value={form.role}>
+                  <SelectTrigger className="rounded-xl bg-background/60 border-border/80 text-foreground">
+                    <SelectValue placeholder="Select your perspective" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border border-border">
+                    <SelectItem value="Movie Critic">Movie Critic</SelectItem>
+                    <SelectItem value="Casual Viewer">Casual Viewer</SelectItem>
+                    <SelectItem value="Cinephile">Cinephile</SelectItem>
+                    <SelectItem value="Film Student">Film Student</SelectItem>
+                    <SelectItem value="Director / Filmmaker">Director / Filmmaker</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="feedback" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Your Experience / Review
+                </Label>
+                <Textarea
+                  id="feedback"
+                  name="feedback"
+                  placeholder="What do you love most about MovieQuest? How has it helped your film discovery?"
+                  value={form.feedback}
+                  onChange={handleChange}
+                  required
+                  rows={4}
+                  className="rounded-xl bg-background/60 border-border/80 resize-none"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={submitMutation.isPending}
+                className="w-full py-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm shadow-md gap-2"
+              >
+                <Send className="h-4 w-4" />
+                {submitMutation.isPending ? 'Submitting...' : 'Submit Testimonial'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </section>
+    </main>
   );
 }

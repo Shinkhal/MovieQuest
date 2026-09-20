@@ -11,7 +11,10 @@ import { StreamingProviders } from '@/components/movie/StreamingProviders';
 import { FinancialDetails } from '@/components/movie/FinancialDetails';
 import { ProductionCompanies } from '@/components/movie/ProductionCompanies';
 import { TrailerModalClient } from '@/components/movie/TrailerModalClient';
-import { Movie } from '@/types/api';
+import { MovieReviews } from '@/components/movie/MovieReviews';
+import { ResultCard } from '@/components/search/ResultCard';
+import { Sparkles, Film } from 'lucide-react';
+import Link from 'next/link';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -23,10 +26,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const movie = await getMovieServer(id);
     return {
       title: `${movie.title} | MovieQuest`,
-      description: movie.overview || `Watch ${movie.title} online`,
+      description: movie.overview || `Watch ${movie.title} online with MovieQuest streaming guide.`,
       openGraph: {
-        title: movie.title,
-        description: movie.overview || `Watch ${movie.title} online`,
+        title: `${movie.title} - MovieQuest`,
+        description: movie.overview || `Discover details and stream ${movie.title}`,
         images: movie.backdrop_path
           ? [`https://image.tmdb.org/t/p/original${movie.backdrop_path}`]
           : movie.poster_path
@@ -36,64 +39,74 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   } catch {
     return {
-      title: 'Movie Not Found | MovieQuest',
+      title: 'Movie Details | MovieQuest',
     };
   }
 }
 
 export default async function MovieDetailPage({ params }: Props) {
   const { id } = await params;
-  const movie = await getMovieServer(id);
+  let movie;
+  try {
+    movie = await getMovieServer(id);
+  } catch (error) {
+    notFound();
+  }
 
-  if (!movie) {
+  if (!movie || !movie.id) {
     notFound();
   }
 
   // Find trailer key
-  const trailerKey = movie.videos?.results?.find(
-    (v) => v.type === 'Trailer' && v.site === 'YouTube' && v.official
-  )?.key ||
+  const trailerKey =
+    movie.videos?.results?.find(
+      (v) => v.type === 'Trailer' && v.site === 'YouTube' && v.official
+    )?.key ||
     movie.videos?.results?.find(
       (v) => v.type === 'Trailer' && v.site === 'YouTube'
     )?.key ||
     movie.videos?.results?.find((v) => v.site === 'YouTube')?.key ||
     null;
 
+  const similarMovies = movie.similar?.results?.slice(0, 5) || [];
+
   return (
-    <div className="bg-background text-foreground min-h-screen pb-16">
+    <div className="bg-background text-foreground min-h-screen pb-20">
       {/* Backdrop hero */}
       <MovieBackdrop movie={movie} />
 
-      {/* Movie details */}
-      <div className="max-w-6xl mx-auto px-4 -mt-20 relative z-20">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Poster & trailer */}
-          <PosterSection
-            movie={movie}
-            trailerKey={trailerKey}
-          />
+      {/* Movie main details section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 sm:-mt-32 relative z-20">
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
+          {/* Left Column: Poster & Actions */}
+          <PosterSection movie={movie} trailerKey={trailerKey} />
 
-          {/* Info section */}
-          <div className="w-full md:w-2/3 lg:w-3/4">
+          {/* Right Column: Information & Cast */}
+          <div className="w-full md:w-2/3 lg:w-3/4 space-y-6">
             <InfoBadges movie={movie} />
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">
-              {movie.title}
-            </h1>
 
-            {movie.tagline && (
-              <p className="text-muted-foreground italic mb-4">{movie.tagline}</p>
-            )}
+            <div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
+                {movie.title}
+              </h1>
+              {movie.tagline && (
+                <p className="text-muted-foreground text-sm sm:text-base italic mt-1 font-light">
+                  "{movie.tagline}"
+                </p>
+              )}
+            </div>
 
             {/* Genres */}
             {movie.genres && movie.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2">
                 {movie.genres.map((genre) => (
-                  <span
+                  <Link
                     key={genre.id}
-                    className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-sm"
+                    href={`/genres/${genre.id}`}
+                    className="px-3.5 py-1 rounded-full bg-muted/80 hover:bg-primary/10 hover:text-primary hover:border-primary/30 border border-border/60 text-muted-foreground text-xs font-semibold transition-all"
                   >
                     {genre.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}
@@ -103,16 +116,36 @@ export default async function MovieDetailPage({ params }: Props) {
             <CastCarousel movie={movie} />
             <StreamingProviders movie={movie} />
 
-            {/* Additional Details Grid */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Financial and Production Details */}
+            <div className="mt-8 pt-8 border-t border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
               <FinancialDetails movie={movie} />
               <ProductionCompanies movie={movie} />
             </div>
           </div>
         </div>
+
+        {/* User Reviews & Ratings Section */}
+        <MovieReviews movieId={movie.id} movieTitle={movie.title} />
+
+        {/* Similar / Recommended Movies */}
+        {similarMovies.length > 0 && (
+          <div className="mt-16 pt-12 border-t border-border/40">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                More Like This
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+              {similarMovies.map((similar) => (
+                <ResultCard key={similar.id} movie={similar} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Trailer Modal - Client Component */}
+      {/* Trailer Modal (client-side) */}
       <TrailerModalClient trailerKey={trailerKey} />
     </div>
   );

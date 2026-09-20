@@ -1,5 +1,9 @@
+'use client';
+
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tv, ExternalLink, Globe } from 'lucide-react';
 import { Movie } from '@/types/api';
 
 interface Provider {
@@ -8,158 +12,173 @@ interface Provider {
   logo_path: string | null;
 }
 
+const POPULAR_SERVICES = [
+  { name: 'Netflix', query: 'https://www.netflix.com/search?q=' },
+  { name: 'Prime Video', query: 'https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=' },
+  { name: 'Apple TV', query: 'https://tv.apple.com/search?term=' },
+  { name: 'YouTube', query: 'https://www.youtube.com/results?search_query=' },
+];
+
 function getImageUrl(path: string | null) {
   if (!path) return '';
   return `https://image.tmdb.org/t/p/w154${path}`;
 }
 
-function formatMovieTitle(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .trim();
-}
-
 function openStreamingService(providerName: string, movie: Movie) {
-  const slug = formatMovieTitle(movie.title);
   const year = movie.release_date ? new Date(movie.release_date).getFullYear() : '';
-
   const providerUrls: Record<string, string> = {
-    'Netflix': `https://www.netflix.com/search?q=${encodeURIComponent(movie.title)}`,
-    'Amazon Prime Video': `https://www.amazon.com/gp/video/search/ref=atv_sr_sug_3?phrase=${encodeURIComponent(movie.title)}&ie=UTF8`,
-    'Prime Video': `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${encodeURIComponent(movie.title)}&ie=UTF8`,
+    Netflix: `https://www.netflix.com/search?q=${encodeURIComponent(movie.title)}`,
+    'Amazon Prime Video': `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${encodeURIComponent(movie.title)}`,
+    'Prime Video': `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${encodeURIComponent(movie.title)}`,
     'Apple TV': `https://tv.apple.com/search?term=${encodeURIComponent(movie.title)}`,
     'Apple TV+': `https://tv.apple.com/search?term=${encodeURIComponent(movie.title)}`,
-    'YouTube': `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' full movie')}`,
+    'Disney Plus': `https://www.disneyplus.com/search?q=${encodeURIComponent(movie.title)}`,
+    'Disney+': `https://www.disneyplus.com/search?q=${encodeURIComponent(movie.title)}`,
+    'Hotstar': `https://www.hotstar.com/in/explore?search_query=${encodeURIComponent(movie.title)}`,
+    YouTube: `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' movie')}`,
     'Google Play Movies': `https://play.google.com/store/search?q=${encodeURIComponent(movie.title)}&c=movies`,
-    'Hulu': `https://www.hulu.com/search?q=${encodeURIComponent(movie.title)}`,
+    Hulu: `https://www.hulu.com/search?q=${encodeURIComponent(movie.title)}`,
+    Max: `https://www.max.com/search?q=${encodeURIComponent(movie.title)}`,
     'HBO Max': `https://www.max.com/search?q=${encodeURIComponent(movie.title)}`,
-    'Max': `https://www.max.com/search?q=${encodeURIComponent(movie.title)}`,
-    'JioCinema': `https://www.jiocinema.com/movies/${slug}`,
-    'SonyLIV': `https://www.sonyliv.com/search?q=${encodeURIComponent(movie.title)}`,
-    'Zee5': `https://www.zee5.com/search?q=${encodeURIComponent(movie.title)}`,
-    'Voot': `https://www.voot.com/search?q=${encodeURIComponent(movie.title)}`,
+    JioCinema: `https://www.jiocinema.com/search/${encodeURIComponent(movie.title)}`,
+    SonyLIV: `https://www.sonyliv.com/search?q=${encodeURIComponent(movie.title)}`,
+    Zee5: `https://www.zee5.com/search?q=${encodeURIComponent(movie.title)}`,
   };
 
-  const url = providerUrls[providerName] || `https://www.google.com/search?q=watch+${encodeURIComponent(movie.title)}+${encodeURIComponent(year)}+on+${encodeURIComponent(providerName)}`;
+  const url =
+    providerUrls[providerName] ||
+    `https://www.google.com/search?q=where+to+watch+${encodeURIComponent(movie.title)}+${encodeURIComponent(year)}+online`;
   window.open(url, '_blank');
 }
 
 export function StreamingProviders({ movie }: { movie: Movie }) {
-  if (!movie.watch_providers?.results?.IN) {
-    return (
-      <div className="mt-8 px-4">
-        <h3 className="text-xl font-bold mb-6 text-foreground">Where to Watch</h3>
-        <div className="text-xl text-red-400 font-medium flex items-center gap-2">
-          No streaming options available in India
-        </div>
-      </div>
-    );
-  }
+  const results = movie.watch_providers?.results || {};
+  const availableRegions = Object.keys(results);
 
-  const providers = movie.watch_providers.results.IN;
-  const flatrate: Provider[] = providers.flatrate || [];
-  const rent: Provider[] = providers.rent || [];
-  const buy: Provider[] = providers.buy || [];
+  // Preferred regions hierarchy
+  const defaultRegion = results.US ? 'US' : results.IN ? 'IN' : results.GB ? 'GB' : availableRegions[0] || '';
+  const [selectedRegion, setSelectedRegion] = useState<string>(defaultRegion);
 
-  if (flatrate.length === 0 && rent.length === 0 && buy.length === 0) {
-    return (
-      <div className="mt-8 px-4">
-        <h3 className="text-xl font-bold mb-6 text-foreground">Where to Watch</h3>
-        <div className="text-xl text-red-400 font-medium flex items-center gap-2">
-          No streaming options available in India
-        </div>
-      </div>
-    );
-  }
+  const regionData = selectedRegion ? results[selectedRegion] : null;
+  const flatrate: Provider[] = regionData?.flatrate || [];
+  const rent: Provider[] = regionData?.rent || [];
+  const buy: Provider[] = regionData?.buy || [];
+
+  const hasWatchData = flatrate.length > 0 || rent.length > 0 || buy.length > 0;
 
   return (
-    <div className="mt-8 px-4">
-      <h3 className="text-xl font-bold mb-6 text-foreground">Where to Watch</h3>
+    <div className="mt-8 border-t border-border/40 pt-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <Tv className="h-5 w-5 text-primary" />
+          Where to Watch
+        </h3>
 
-      {flatrate.length > 0 && (
-        <div className="mb-8">
-          <h4 className="text-sm text-foreground mb-3 font-medium">Stream</h4>
-          <div className="flex flex-wrap gap-4">
-            {flatrate.map((provider) => (
-              <Card
-                key={provider.provider_id}
-                className="w-28 h-28 bg-muted/50 border-0 p-1 cursor-pointer hover:bg-muted transition-colors"
-                onClick={() => openStreamingService(provider.provider_name, movie)}
-              >
-                <CardContent className="flex flex-col items-center p-2">
-                  <div className="w-12 h-12 rounded-lg overflow-hidden mb-2 bg-background border border-muted">
-                    <Image
-                      src={getImageUrl(provider.logo_path)}
-                      alt={provider.provider_name}
-                      fill
-                      className="object-contain p-1"
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground text-center font-medium">
-                    {provider.provider_name}
-                  </span>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Region selector if multiple regions available */}
+        {availableRegions.length > 1 && (
+          <div className="flex items-center gap-2 text-xs">
+            <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+            <select
+              value={selectedRegion}
+              onChange={(e) => setSelectedRegion(e.target.value)}
+              className="bg-card border border-border/80 rounded-lg px-2.5 py-1 text-xs text-foreground outline-none focus:border-primary"
+            >
+              {availableRegions.map((code) => (
+                <option key={code} value={code}>
+                  Region: {code}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {rent.length > 0 && (
-        <div className="mb-8">
-          <h4 className="text-sm text-amber-500 mb-3 font-medium">Rent</h4>
-          <div className="flex flex-wrap gap-4">
-            {rent.map((provider) => (
-              <Card
-                key={provider.provider_id}
-                className="w-24 h-28 bg-muted/50 border-0 p-1 cursor-pointer hover:bg-muted transition-colors"
-                onClick={() => openStreamingService(provider.provider_name, movie)}
-              >
-                <CardContent className="flex flex-col items-center p-2">
-                  <div className="w-12 h-12 rounded-lg overflow-hidden mb-2 bg-background border border-amber-500">
-                    <Image
-                      src={getImageUrl(provider.logo_path)}
-                      alt={provider.provider_name}
-                      fill
-                      className="object-contain p-1"
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground text-center font-medium">
-                    {provider.provider_name}
-                  </span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+      {hasWatchData ? (
+        <div className="space-y-6">
+          {flatrate.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                Stream Subscription
+              </h4>
+              <div className="flex flex-wrap gap-3">
+                {flatrate.map((provider) => (
+                  <button
+                    key={provider.provider_id}
+                    onClick={() => openStreamingService(provider.provider_name, movie)}
+                    className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/60 bg-card/60 hover:bg-card hover:border-primary/50 transition-all text-left shadow-sm group"
+                  >
+                    <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-background border border-border/40 flex-shrink-0">
+                      {provider.logo_path ? (
+                        <Image
+                          src={getImageUrl(provider.logo_path)}
+                          alt={provider.provider_name}
+                          fill
+                          className="object-contain p-0.5"
+                        />
+                      ) : (
+                        <Tv className="h-4 w-4 m-auto text-muted-foreground" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors block">
+                        {provider.provider_name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">Watch Now</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {buy.length > 0 && (
-        <div className="mb-4">
-          <h4 className="text-sm text-green-500 mb-3 font-medium">Buy</h4>
-          <div className="flex flex-wrap gap-4">
-            {buy.map((provider) => (
-              <Card
-                key={provider.provider_id}
-                className="w-24 h-28 bg-muted/50 border-0 p-2 cursor-pointer hover:bg-muted transition-colors"
-                onClick={() => openStreamingService(provider.provider_name, movie)}
+          {rent.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                Rent / Buy Digital
+              </h4>
+              <div className="flex flex-wrap gap-3">
+                {rent.slice(0, 6).map((provider) => (
+                  <button
+                    key={provider.provider_id}
+                    onClick={() => openStreamingService(provider.provider_name, movie)}
+                    className="flex items-center gap-2 p-2 rounded-xl border border-border/60 bg-card/40 hover:bg-card hover:border-primary/40 transition text-left"
+                  >
+                    <div className="relative w-7 h-7 rounded-md overflow-hidden bg-background border border-border/30 flex-shrink-0">
+                      {provider.logo_path ? (
+                        <Image
+                          src={getImageUrl(provider.logo_path)}
+                          alt={provider.provider_name}
+                          fill
+                          className="object-contain p-0.5"
+                        />
+                      ) : (
+                        <Tv className="h-3.5 w-3.5 m-auto text-muted-foreground" />
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {provider.provider_name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-border/60 bg-card/40 p-6 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Direct streaming availability varies by region. You can search across popular streaming platforms:
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {POPULAR_SERVICES.map((srv) => (
+              <button
+                key={srv.name}
+                onClick={() => openStreamingService(srv.name, movie)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border/60 bg-card/80 text-xs font-medium text-foreground/90 hover:text-primary hover:border-primary/50 transition-all"
               >
-                <CardContent className="flex flex-col items-center p-2">
-                  <div className="w-12 h-12 rounded-lg overflow-hidden mb-2 bg-background border border-green-500">
-                    <Image
-                      src={getImageUrl(provider.logo_path)}
-                      alt={provider.provider_name}
-                      fill
-                      className="object-contain p-1"
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground text-center font-medium">
-                    {provider.provider_name}
-                  </span>
-                </CardContent>
-              </Card>
+                <span>{srv.name}</span>
+                <ExternalLink className="h-3 w-3 text-muted-foreground" />
+              </button>
             ))}
           </div>
         </div>

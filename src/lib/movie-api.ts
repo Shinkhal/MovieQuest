@@ -4,14 +4,15 @@ import { Movie } from '@/types/api';
 
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
-/** Fetch full movie details with credits, videos, and watch providers */
+/** Fetch full movie details with credits, videos, watch providers, and similar movies */
 export async function getMovieServer(id: string): Promise<Movie> {
   const baseUrl = 'https://api.themoviedb.org/3';
-  const [movieRes, creditsRes, videosRes, providersRes] = await Promise.all([
+  const [movieRes, creditsRes, videosRes, providersRes, similarRes] = await Promise.all([
     axios.get(`${baseUrl}/movie/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos&language=en-US`),
     axios.get(`${baseUrl}/movie/${id}/credits?api_key=${TMDB_API_KEY}`),
     axios.get(`${baseUrl}/movie/${id}/videos?api_key=${TMDB_API_KEY}`),
-    axios.get(`${baseUrl}/movie/${id}/watch/providers?api_key=${TMDB_API_KEY}`),
+    axios.get(`${baseUrl}/movie/${id}/watch/providers?api_key=${TMDB_API_KEY}`).catch(() => ({ data: {} })),
+    axios.get(`${baseUrl}/movie/${id}/similar?api_key=${TMDB_API_KEY}&page=1`).catch(() => ({ data: { results: [] } })),
   ]);
 
   return {
@@ -19,6 +20,7 @@ export async function getMovieServer(id: string): Promise<Movie> {
     credits: creditsRes.data,
     videos: videosRes.data,
     watch_providers: providersRes.data,
+    similar: similarRes.data,
   };
 }
 
@@ -28,17 +30,19 @@ export function useMovieDetail(id: string | number) {
     queryKey: ['movie', id],
     queryFn: async () => {
       const baseUrl = 'https://api.themoviedb.org/3';
-      const [movieRes, creditsRes, videosRes, providersRes] = await Promise.all([
+      const [movieRes, creditsRes, videosRes, providersRes, similarRes] = await Promise.all([
         axios.get(`${baseUrl}/movie/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos&language=en-US`),
         axios.get(`${baseUrl}/movie/${id}/credits?api_key=${TMDB_API_KEY}`),
         axios.get(`${baseUrl}/movie/${id}/videos?api_key=${TMDB_API_KEY}`),
-        axios.get(`${baseUrl}/movie/${id}/watch/providers?api_key=${TMDB_API_KEY}`),
+        axios.get(`${baseUrl}/movie/${id}/watch/providers?api_key=${TMDB_API_KEY}`).catch(() => ({ data: {} })),
+        axios.get(`${baseUrl}/movie/${id}/similar?api_key=${TMDB_API_KEY}&page=1`).catch(() => ({ data: { results: [] } })),
       ]);
       return {
         ...movieRes.data,
         credits: creditsRes.data,
         videos: videosRes.data,
         watch_providers: providersRes.data,
+        similar: similarRes.data,
       };
     },
     enabled: !!id,
