@@ -18,7 +18,7 @@ const authSecret =
   process.env.NEXTAUTH_SECRET;
 
 if (!authSecret && process.env.NODE_ENV === 'production') {
-  console.warn('[AUTH_WARNING] AUTH_SECRET or NEXTAUTH_SECRET is not set in production environment variables.');
+  throw new Error('[AUTH_ERROR] AUTH_SECRET or NEXTAUTH_SECRET is required in production environment variables.');
 }
 
 const providers: any[] = [];
@@ -44,13 +44,13 @@ providers.push(
       const name = (credentials?.name as string)?.trim() || 'Film Buff';
       const guestUniqueId = crypto.randomUUID();
       const guestId = `guest_${guestUniqueId}`;
-      const guestEmail = `guest_${guestUniqueId.slice(0, 8)}@guest.moviequest.internal`;
+      const guestEmail = `guest_${guestUniqueId}@guest.moviequest.internal`;
 
       return {
         id: guestId,
         name,
         email: guestEmail,
-        image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(guestUniqueId.slice(0, 8))}`,
+        image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(guestUniqueId)}`,
         isGuest: true,
       };
     },
@@ -75,7 +75,7 @@ export const {
     async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
-        token.isGuest = (user as any).isGuest;
+        token.isGuest = user.isGuest;
       }
       return token;
     },
@@ -83,5 +83,5 @@ export const {
   pages: {
     signIn: '/auth/signin',
   },
-  secret: authSecret || 'moviequest_dev_fallback_secret_key_change_in_production',
+  secret: authSecret,
 });

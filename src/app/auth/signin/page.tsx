@@ -37,7 +37,6 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = () => {
@@ -49,10 +48,8 @@ function SignInContent() {
     e.preventDefault();
     if (!guestName.trim()) return;
     setLoading(true);
-    const email = guestEmail.trim() || `${guestName.toLowerCase().replace(/\s+/g, '')}@moviequest.com`;
     signIn('credentials', {
       name: guestName,
-      email,
       callbackUrl,
     });
   };
@@ -112,20 +109,6 @@ function SignInContent() {
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
                 required
-                className="rounded-xl bg-background/70 border-border/80"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-semibold text-muted-foreground">
-                Email (Optional)
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
                 className="rounded-xl bg-background/70 border-border/80"
               />
             </div>

@@ -85,7 +85,7 @@ export function useWatchlist() {
     staleTime: 1000 * 60 * 5, // 5 minutes cache
   });
 
-  const watchlist = isAuthenticated && cloudList.length > 0 ? cloudList : localList;
+  const watchlist = isAuthenticated ? cloudList : localList;
 
   const isInWatchlist = useCallback(
     (movieId: number) => {

@@ -45,16 +45,16 @@ Create a `.env.local` file in the root directory and configure the following var
 # TMDB API
 NEXT_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
 
-# MongoDB Database Connection
+# MongoDB Database Connection (Server-only; MUST NOT be prefixed with NEXT_PUBLIC_)
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/moviequest?retryWrites=true&w=majority
 
-# Auth.js / NextAuth Configuration
+# Auth.js / NextAuth Configuration (Required in production)
 AUTH_SECRET=your_generated_auth_secret_key
 AUTH_URL=https://movies-quest.vercel.app
 
-# Google OAuth Credentials
-CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
-CLIENT_SECRET=your_google_oauth_client_secret
+# Google OAuth Credentials (AUTH_GOOGLE_ID or GOOGLE_CLIENT_ID or CLIENT_ID)
+AUTH_GOOGLE_ID=your_google_oauth_client_id.apps.googleusercontent.com
+AUTH_GOOGLE_SECRET=your_google_oauth_client_secret
 
 # Optional Application URL
 NEXT_PUBLIC_APP_URL=https://movies-quest.vercel.app
