@@ -44,12 +44,10 @@ export default function ContactPage() {
         toast.success('Thank you! Your message has been sent successfully.');
         setFormData({ name: '', email: '', subject: '', message: '' });
       } else {
-        toast.info('Message received! Thanks for reaching out.');
-        setFormData({ name: '', email: '', subject: '', message: '' });
+        toast.error(result.message || 'Failed to deliver message. Please reach out directly to shinkhalsinha@gmail.com');
       }
-    } catch {
-      toast.info('Thank you! Your message has been noted.');
-      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      toast.error('Network error. Please try again or email shinkhalsinha@gmail.com directly.');
     } finally {
       setLoading(false);
     }

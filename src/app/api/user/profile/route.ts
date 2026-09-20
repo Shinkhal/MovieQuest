@@ -73,7 +73,10 @@ export async function GET(request: Request) {
     const watchlist = await Watchlist.findOne({ userId: targetUserId });
     const moviesCount = watchlist?.movies?.length || 0;
 
-    const userReviews = await Review.find({ userId: targetUserId }).sort({ createdAt: -1 });
+    // Exclude reviewer emails from recentReviews for privacy
+    const userReviews = await Review.find({ userId: targetUserId })
+      .select('-userEmail')
+      .sort({ createdAt: -1 });
     const reviewCount = userReviews.length;
     const avgRating =
       reviewCount > 0
@@ -87,11 +90,16 @@ export async function GET(request: Request) {
 
     const dynamicRank = calculateRank(moviesCount, reviewCount);
 
+    const profileObj = profile.toObject();
+    profileObj.rankBadge = dynamicRank;
+
+    // Strip private email address if not the owner
+    if (!isOwner) {
+      delete profileObj.email;
+    }
+
     return NextResponse.json({
-      profile: {
-        ...profile.toObject(),
-        rankBadge: dynamicRank,
-      },
+      profile: profileObj,
       stats: {
         watchlistCount: moviesCount,
         reviewCount,
@@ -101,10 +109,10 @@ export async function GET(request: Request) {
       watchlistMovies: (isOwner || profile.isPublic) ? watchlist?.movies || [] : [],
       isOwner,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Profile API GET error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch user profile", details: error.message },
+      { error: "Failed to fetch user profile" },
       { status: 500 }
     );
   }
@@ -146,14 +154,14 @@ export async function POST(request: Request) {
       { userId },
       {
         $set: {
-          name: name || session.user.name || "Film Buff",
+          name: typeof name === 'string' ? name.slice(0, 50) : session.user.name || "Film Buff",
           email: session.user.email,
-          image: image || session.user.image,
+          image: typeof image === 'string' ? image.slice(0, 500) : session.user.image,
           bio: typeof bio === "string" ? bio.slice(0, 300) : "",
           favoriteMovie: typeof favoriteMovie === "string" ? favoriteMovie.slice(0, 100) : "",
           favoriteGenres: Array.isArray(favoriteGenres) ? favoriteGenres.slice(0, 6) : [],
-          twitterUsername: typeof twitterUsername === "string" ? twitterUsername.replace(/^@/, "").trim() : "",
-          letterboxdUsername: typeof letterboxdUsername === "string" ? letterboxdUsername.trim() : "",
+          twitterUsername: typeof twitterUsername === "string" ? twitterUsername.replace(/^@/, "").trim().slice(0, 50) : "",
+          letterboxdUsername: typeof letterboxdUsername === "string" ? letterboxdUsername.trim().slice(0, 50) : "",
           isPublic: isPublic !== false,
           rankBadge,
         },
@@ -166,10 +174,10 @@ export async function POST(request: Request) {
       message: "Profile updated successfully!",
       profile: updatedProfile,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Profile API POST error:", error);
     return NextResponse.json(
-      { error: "Failed to update profile", details: error.message },
+      { error: "Failed to update profile" },
       { status: 500 }
     );
   }

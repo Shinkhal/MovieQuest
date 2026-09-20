@@ -1,18 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Movie } from '@/types/api';
 import axios from 'axios';
 
-const WATCHLIST_KEY = 'moviequest_watchlist';
 const WATCHLIST_EVENT = 'moviequest_watchlist_updated';
 
-function getLocalWatchlist(): Movie[] {
+function getLocalWatchlist(key: string): Movie[] {
   try {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(WATCHLIST_KEY);
+      const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : [];
     }
   } catch {
@@ -21,18 +20,36 @@ function getLocalWatchlist(): Movie[] {
   return [];
 }
 
+function setLocalWatchlist(key: string, list: Movie[]) {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, JSON.stringify(list));
+      window.dispatchEvent(new Event(WATCHLIST_EVENT));
+    }
+  } catch (e) {
+    console.error('Failed to save local watchlist', e);
+  }
+}
+
 export function useWatchlist() {
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
-  const [localList, setLocalList] = useState<Movie[]>([]);
   const isAuthenticated = status === 'authenticated';
+  
+  // Scope storage key per user identity to prevent cross-account data leakage
+  const storageKey = useMemo(() => {
+    const userId = session?.user?.id || session?.user?.email;
+    return userId ? `moviequest_watchlist_${userId}` : 'moviequest_watchlist_guest';
+  }, [session?.user?.id, session?.user?.email]);
 
-  // Load from local storage initially
+  const [localList, setLocalList] = useState<Movie[]>([]);
+
+  // Load from scoped local storage initially and when account switches
   useEffect(() => {
-    setLocalList(getLocalWatchlist());
+    setLocalList(getLocalWatchlist(storageKey));
 
     const handleStorage = () => {
-      setLocalList(getLocalWatchlist());
+      setLocalList(getLocalWatchlist(storageKey));
     };
 
     window.addEventListener('storage', handleStorage);
@@ -42,24 +59,24 @@ export function useWatchlist() {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener(WATCHLIST_EVENT, handleStorage);
     };
-  }, []);
+  }, [storageKey]);
 
   // Use React Query for cloud watchlist (cached and deduplicated across all components)
   const { data: cloudList = [], isLoading: isCloudLoading } = useQuery<Movie[]>({
-    queryKey: ['cloud-watchlist', session?.user?.email || session?.user?.id],
+    queryKey: ['cloud-watchlist', session?.user?.id || session?.user?.email],
     queryFn: async () => {
-      const local = getLocalWatchlist();
+      const local = getLocalWatchlist(storageKey);
       if (local.length > 0) {
         // Sync local to cloud on first fetch
         const { data } = await axios.post('/api/watchlist', { syncList: local });
         if (data?.movies) {
-          localStorage.setItem(WATCHLIST_KEY, JSON.stringify(data.movies));
+          setLocalWatchlist(storageKey, data.movies);
           return data.movies;
         }
       }
       const { data } = await axios.get('/api/watchlist');
       if (data?.movies) {
-        localStorage.setItem(WATCHLIST_KEY, JSON.stringify(data.movies));
+        setLocalWatchlist(storageKey, data.movies);
         return data.movies;
       }
       return [];
@@ -119,28 +136,26 @@ export function useWatchlist() {
 
       const updated = [simplifiedMovie, ...watchlist.filter((m) => m.id !== movie.id)];
       setLocalList(updated);
-      localStorage.setItem(WATCHLIST_KEY, JSON.stringify(updated));
-      window.dispatchEvent(new Event(WATCHLIST_EVENT));
+      setLocalWatchlist(storageKey, updated);
 
       if (isAuthenticated) {
         addToWatchlistMutation.mutate(simplifiedMovie);
       }
     },
-    [watchlist, isAuthenticated, addToWatchlistMutation]
+    [watchlist, isAuthenticated, storageKey, addToWatchlistMutation]
   );
 
   const removeFromWatchlist = useCallback(
     (movieId: number) => {
       const updated = watchlist.filter((m) => m.id !== movieId);
       setLocalList(updated);
-      localStorage.setItem(WATCHLIST_KEY, JSON.stringify(updated));
-      window.dispatchEvent(new Event(WATCHLIST_EVENT));
+      setLocalWatchlist(storageKey, updated);
 
       if (isAuthenticated) {
         removeFromWatchlistMutation.mutate(movieId);
       }
     },
-    [watchlist, isAuthenticated, removeFromWatchlistMutation]
+    [watchlist, isAuthenticated, storageKey, removeFromWatchlistMutation]
   );
 
   const toggleWatchlist = useCallback(

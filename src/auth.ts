@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
+import crypto from 'crypto';
 
 const googleClientId =
   process.env.AUTH_GOOGLE_ID ||
@@ -12,39 +13,45 @@ const googleClientSecret =
   process.env.GOOGLE_CLIENT_SECRET ||
   process.env.CLIENT_SECRET;
 
+const authSecret =
+  process.env.AUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET;
+
+if (!authSecret && process.env.NODE_ENV === 'production') {
+  console.warn('[AUTH_WARNING] AUTH_SECRET or NEXTAUTH_SECRET is not set in production environment variables.');
+}
+
 const providers: any[] = [];
 
-if (googleClientId && googleClientSecret) {
+// Only register Google OAuth provider if valid credentials are configured
+if (googleClientId && googleClientSecret && !googleClientId.includes('placeholder')) {
   providers.push(
     Google({
       clientId: googleClientId,
       clientSecret: googleClientSecret,
     })
   );
-} else {
-  providers.push(
-    Google({
-      clientId: 'google-client-id-placeholder',
-      clientSecret: 'google-client-secret-placeholder',
-    })
-  );
 }
 
+// Guest authentication for testing & instant access
 providers.push(
   Credentials({
     name: 'Guest Cinephile',
     credentials: {
-      email: { label: 'Email', type: 'email', placeholder: 'cinephile@moviequest.com' },
       name: { label: 'Name', type: 'text', placeholder: 'Film Buff' },
     },
     async authorize(credentials) {
-      const email = (credentials?.email as string) || 'guest@moviequest.com';
-      const name = (credentials?.name as string) || 'Film Buff';
+      const name = (credentials?.name as string)?.trim() || 'Film Buff';
+      const guestUniqueId = crypto.randomUUID();
+      const guestId = `guest_${guestUniqueId}`;
+      const guestEmail = `guest_${guestUniqueId.slice(0, 8)}@guest.moviequest.internal`;
+
       return {
-        id: `guest_${Buffer.from(email).toString('hex').slice(0, 12)}`,
+        id: guestId,
         name,
-        email,
-        image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+        email: guestEmail,
+        image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(guestUniqueId.slice(0, 8))}`,
+        isGuest: true,
       };
     },
   })
@@ -61,12 +68,14 @@ export const {
     async session({ session, token }) {
       if (session?.user && token?.sub) {
         session.user.id = token.sub;
+        session.user.isGuest = Boolean(token.isGuest);
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
+        token.isGuest = (user as any).isGuest;
       }
       return token;
     },
@@ -74,8 +83,5 @@ export const {
   pages: {
     signIn: '/auth/signin',
   },
-  secret:
-    process.env.AUTH_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    'moviequest_secure_auth_session_secret_key_2026',
+  secret: authSecret || 'moviequest_dev_fallback_secret_key_change_in_production',
 });

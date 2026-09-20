@@ -1,48 +1,43 @@
 import axios from 'axios';
+import { cache } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Movie } from '@/types/api';
 
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
-/** Fetch full movie details with credits, videos, watch providers, and similar movies */
-export async function getMovieServer(id: string): Promise<Movie> {
+/**
+ * Fetch full movie details with credits, videos, watch providers, and similar movies in a single TMDB request.
+ * Wrapped in React cache() so generateMetadata and Page component share the exact same promise during SSR.
+ */
+export const getMovieServer = cache(async (id: string): Promise<Movie> => {
   const baseUrl = 'https://api.themoviedb.org/3';
-  const [movieRes, creditsRes, videosRes, providersRes, similarRes] = await Promise.all([
-    axios.get(`${baseUrl}/movie/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos&language=en-US`),
-    axios.get(`${baseUrl}/movie/${id}/credits?api_key=${TMDB_API_KEY}`),
-    axios.get(`${baseUrl}/movie/${id}/videos?api_key=${TMDB_API_KEY}`),
-    axios.get(`${baseUrl}/movie/${id}/watch/providers?api_key=${TMDB_API_KEY}`).catch(() => ({ data: {} })),
-    axios.get(`${baseUrl}/movie/${id}/similar?api_key=${TMDB_API_KEY}&page=1`).catch(() => ({ data: { results: [] } })),
-  ]);
+  const url = `${baseUrl}/movie/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos,similar,watch/providers&language=en-US`;
+  
+  const { data } = await axios.get(url);
 
   return {
-    ...movieRes.data,
-    credits: creditsRes.data,
-    videos: videosRes.data,
-    watch_providers: providersRes.data,
-    similar: similarRes.data,
+    ...data,
+    credits: data.credits || { cast: [], crew: [] },
+    videos: data.videos || { results: [] },
+    watch_providers: data['watch/providers'] || {},
+    similar: data.similar || { results: [] },
   };
-}
+});
 
-/** Client-side hook for movie details (uses React Query) */
+/** Client-side hook for movie details (uses React Query with caching) */
 export function useMovieDetail(id: string | number) {
   return useQuery<Movie, Error, Movie>({
     queryKey: ['movie', id],
     queryFn: async () => {
       const baseUrl = 'https://api.themoviedb.org/3';
-      const [movieRes, creditsRes, videosRes, providersRes, similarRes] = await Promise.all([
-        axios.get(`${baseUrl}/movie/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos&language=en-US`),
-        axios.get(`${baseUrl}/movie/${id}/credits?api_key=${TMDB_API_KEY}`),
-        axios.get(`${baseUrl}/movie/${id}/videos?api_key=${TMDB_API_KEY}`),
-        axios.get(`${baseUrl}/movie/${id}/watch/providers?api_key=${TMDB_API_KEY}`).catch(() => ({ data: {} })),
-        axios.get(`${baseUrl}/movie/${id}/similar?api_key=${TMDB_API_KEY}&page=1`).catch(() => ({ data: { results: [] } })),
-      ]);
+      const url = `${baseUrl}/movie/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos,similar,watch/providers&language=en-US`;
+      const { data } = await axios.get(url);
       return {
-        ...movieRes.data,
-        credits: creditsRes.data,
-        videos: videosRes.data,
-        watch_providers: providersRes.data,
-        similar: similarRes.data,
+        ...data,
+        credits: data.credits || { cast: [], crew: [] },
+        videos: data.videos || { results: [] },
+        watch_providers: data['watch/providers'] || {},
+        similar: data.similar || { results: [] },
       };
     },
     enabled: !!id,
