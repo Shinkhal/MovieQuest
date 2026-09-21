@@ -1,175 +1,258 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Mail, Phone, MapPin, Send, MessageCircle, HelpCircle, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  const form = e.currentTarget;
-  const formData = new FormData(form);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject || 'MovieQuest Inquiry',
+          message: formData.message,
+        }),
+      });
 
-  try {
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        access_key: process.env.NEXT_PUBLIC_FORM_KEY,
-        name: formData.get("name"),
-        email: formData.get("email"),
-        message: formData.get("message"),
-      }),
-    });
+      const result = await response.json();
 
-    const result = await response.json();
-
-    if (result.success) {
-      alert("Thank you for contacting us!");
-      form.reset();
-    } else {
-      alert("Something went wrong. Please try again.");
+      if (response.ok && result.success) {
+        toast.success(result.message || 'Thank you! Your message has been sent successfully.');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        toast.error(result.error || 'Failed to deliver message. Please reach out directly to shinkhalsinha@gmail.com');
+      }
+    } catch (err) {
+      toast.error('Network error. Please try again or email shinkhalsinha@gmail.com directly.');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    alert("Something went wrong. Please try again.");
   }
 
-  setLoading(false);
-}
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
+  const faqs = [
+    {
+      q: 'Where does MovieQuest get its movie metadata?',
+      a: 'All movie details, cast credits, posters, and ratings are dynamically powered by The Movie Database (TMDB) API.',
+    },
+    {
+      q: 'Are the streaming provider links accurate?',
+      a: 'Yes! We fetch verified streaming, rental, and digital purchase platforms using JustWatch / TMDB watch provider feeds.',
+    },
+    {
+      q: 'How does the Watchlist work?',
+      a: 'Guest visitors can save movies locally in their browser without an account. Once you sign in with Google or as a guest cinephile, your watchlist is automatically synced to your cloud account so you can access your saved films across any device.',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-light mb-4 text-white">Contact</h1>
-          <div className="w-12 h-px bg-gray-600 mx-auto mb-6"></div>
-          <p className="text-gray-400 text-lg font-light max-w-2xl mx-auto">
-            Have a question or want to work together? I'd love to hear from you.
+    <main className="min-h-screen bg-background text-foreground pb-20">
+      {/* Header */}
+      <section className="relative py-16 px-4 border-b border-border/40 bg-gradient-to-b from-primary/10 via-background to-background">
+        <div className="max-w-4xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+            <MessageCircle className="h-3.5 w-3.5" />
+            Get in Touch
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
+            Let's <span className="text-primary">Connect</span>
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
+            Have feedback, feature suggestions, or want to collaborate? We'd love to hear from you.
           </p>
         </div>
+      </section>
 
-        {/* Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-16">
-          {/* Contact Information */}
-          <div className="lg:col-span-1 space-y-8">
-            <div className="space-y-6">
-              <div className="group">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                    <Mail className="w-4 h-4 text-gray-400" />
+      {/* Main Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Left: Contact Info & FAQ */}
+          <div className="lg:col-span-5 space-y-6">
+            <Card className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-6 shadow-sm">
+              <CardHeader className="p-0 pb-6 border-b border-border/40">
+                <CardTitle className="text-lg font-bold">Contact Details</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
+                  Reach out directly via email or phone
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0 pt-6 space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 flex-shrink-0">
+                    <Mail className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-200">Email</h3>
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                      Email
+                    </span>
+                    <a
+                      href="mailto:shinkhalsinha@gmail.com"
+                      className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                    >
+                      shinkhalsinha@gmail.com
+                    </a>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm ml-14">shinkhalsinha@gmail.com</p>
-              </div>
 
-              <div className="group">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                    <Phone className="w-4 h-4 text-gray-400" />
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 flex-shrink-0">
+                    <Phone className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-200">Phone</h3>
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                      Phone
+                    </span>
+                    <p className="text-sm font-medium text-foreground">+91 9431063696</p>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm ml-14">+91 9431063696</p>
-              </div>
 
-              <div className="group">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center group-hover:bg-gray-800 transition-colors">
-                    <MapPin className="w-4 h-4 text-gray-400" />
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 flex-shrink-0">
+                    <MapPin className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-200">Location</h3>
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                      Location
+                    </span>
+                    <p className="text-sm font-medium text-foreground">Jalandhar, Punjab, India</p>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm ml-14">Jalandhar, Punjab, India</p>
+              </CardContent>
+            </Card>
+
+            {/* Quick FAQs */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 px-1">
+                <HelpCircle className="h-4 w-4 text-primary" />
+                Frequently Asked Questions
+              </h3>
+              <div className="space-y-3">
+                {faqs.map((faq, i) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm space-y-1"
+                  >
+                    <h4 className="text-xs sm:text-sm font-semibold text-foreground">{faq.q}</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{faq.a}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gray-900/50 border-gray-800 shadow-2xl">
-              <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Name Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-gray-300 font-light">
-                      Name
+          {/* Right: Contact Form */}
+          <div className="lg:col-span-7">
+            <Card className="rounded-2xl border border-border/70 bg-card/70 backdrop-blur-md shadow-xl overflow-hidden">
+              <CardHeader className="border-b border-border/40 bg-muted/20 pb-6">
+                <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Send a Message
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm text-muted-foreground">
+                  Fill in the form below and we will get back to you as soon as possible.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="p-6 sm:p-8">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Your Name *
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="e.g. Maya Lin"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="rounded-xl bg-background/60 border-border/80"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Email Address *
+                      </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="maya@example.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="rounded-xl bg-background/60 border-border/80"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="subject" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Subject
                     </Label>
                     <Input
-                      id="name"
-                      name="name"
-                      placeholder="Your name"
-                      required
-                      className="bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-gray-600 focus:ring-0 transition-colors"
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      placeholder="e.g. Feature Suggestion / Partnership"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className="rounded-xl bg-background/60 border-border/80"
                     />
                   </div>
 
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-300 font-light">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      required
-                      className="bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-gray-600 focus:ring-0 transition-colors"
-                    />
-                  </div>
-
-                  {/* Message Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="message" className="text-gray-300 font-light">
-                      Message
+                  <div className="space-y-1.5">
+                    <Label htmlFor="message" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Message *
                     </Label>
                     <Textarea
                       id="message"
                       name="message"
-                      placeholder="Tell me about your project or inquiry..."
-                      rows={6}
+                      rows={5}
+                      placeholder="Write your message or inquiry here..."
+                      value={formData.message}
+                      onChange={handleChange}
                       required
-                      className="bg-gray-900/80 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-gray-600 focus:ring-0 transition-colors resize-none"
+                      className="rounded-xl bg-background/60 border-border/80 resize-none text-xs sm:text-sm"
                     />
                   </div>
 
-                  {/* Submit Button */}
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gray-800 hover:bg-gray-700 text-gray-100 font-light py-3 transition-all duration-200 border border-gray-700 hover:border-gray-600"
+                    className="w-full py-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm shadow-md gap-2"
                   >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                        Sending...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Send className="w-4 h-4" />
-                        Send Message
-                      </div>
-                    )}
+                    <Send className="h-4 w-4" />
+                    {loading ? 'Sending Message...' : 'Send Message'}
                   </Button>
                 </form>
               </CardContent>
@@ -177,6 +260,6 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

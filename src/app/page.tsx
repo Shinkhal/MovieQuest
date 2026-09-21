@@ -1,248 +1,235 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { Star, Search, Heart, Play, Clock, Film } from "lucide-react";
-import { cn } from "@/lib/utils";
-import TestimonialSection from "@/components/Testimonials";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import Snowfall from 'react-snowfall';
+import React from 'react';
+import Link from 'next/link';
+import Hero from '@/components/home/Hero';
+import { MovieCarousel } from '@/components/home/MovieCarousel';
+import { StatCard } from '@/components/home/StatCard';
+import { BenefitCard } from '@/components/home/BenefitCard';
+import TestimonialSection from '@/components/Testimonials';
+import { useMovies } from '@/lib/api';
+import {
+  Film,
+  Sparkles,
+  Heart,
+  Clock,
+  Star,
+  Flame,
+  TrendingUp,
+  Clapperboard,
+  Compass,
+  ArrowRight,
+  ShieldCheck,
+  Tv,
+} from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
- 
+  const { data: trendingData, isLoading: isTrendingLoading } = useMovies({
+    type: 'trending',
+  });
+  const { data: topRatedData, isLoading: isTopRatedLoading } = useMovies({
+    type: 'top_rated',
+  });
+  const { data: nowPlayingData, isLoading: isNowPlayingLoading } = useMovies({
+    type: 'now_playing',
+  });
+
   const stats = [
-    { name: "Movies in our database", value: "15,000+", icon: <Film className="h-6 w-6 text-indigo-400" /> },
-    { name: "Genres covered", value: "30+", icon: <Search className="h-6 w-6 text-indigo-400" /> },
-    { name: "Daily active users", value: "1,000+", icon: <Heart className="h-6 w-6 text-indigo-400" /> },
-    { name: "Average ratings", value: "4.4/5", icon: <Star className="h-6 w-6 text-indigo-400" /> },
+    {
+      name: 'Movies in Database',
+      value: '20,000+',
+      icon: <Film className="h-6 w-6" />,
+    },
+    {
+      name: 'Curated Genres',
+      value: '19 Categories',
+      icon: <Sparkles className="h-6 w-6" />,
+    },
+    {
+      name: 'Active Film Buffs',
+      value: '10,000+',
+      icon: <Heart className="h-6 w-6" />,
+    },
+    {
+      name: 'Average Rating Score',
+      value: '4.8 / 5.0',
+      icon: <Star className="h-6 w-6" />,
+    },
   ];
 
   const benefits = [
     {
-      title: "AI-Powered Recommendations",
-      description: "Our algorithm learns your preferences and suggests movies you'll love",
-      icon: <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
-              <Search className="h-6 w-6 text-indigo-500" />
-            </div>
+      title: 'Smart AI Discovery',
+      description:
+        'Our algorithms analyze genre preferences, ratings, and cast members to recommend hidden cinematic gems.',
+      icon: <Sparkles className="h-6 w-6" />,
     },
     {
-      title: "Cross-Platform Streaming",
-      description: "One click to your preferred streaming service where the movie is available",
-      icon: <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
-              <Play className="h-6 w-6 text-indigo-500" />
-            </div>
+      title: 'Real-Time Streaming Guides',
+      description:
+        'Instant links to stream, rent, or buy movies directly on Netflix, Prime Video, Apple TV, Disney+, and more.',
+      icon: <Tv className="h-6 w-6" />,
     },
     {
-      title: "Personalized Watchlists",
-      description: "Create and manage custom watchlists synced across all your devices",
-      icon: <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
-              <Heart className="h-6 w-6 text-indigo-500" />
-            </div>
+      title: 'Personalized Watchlists',
+      description:
+        'Save any title with one tap to your local watchlist and organize your weekend movie marathons effortlessly.',
+      icon: <Heart className="h-6 w-6" />,
     },
     {
-      title: "Watch History",
-      description: "Keep track of what you've watched and get smarter recommendations",
-      icon: <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
-              <Clock className="h-6 w-6 text-indigo-500" />
-            </div>
+      title: 'Comprehensive Film Analytics',
+      description:
+        'Explore cast profiles, directors, box-office revenue, official trailers, and audience reviews in one sleek interface.',
+      icon: <ShieldCheck className="h-6 w-6" />,
     },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
-  };
+  const featuredGenres = [
+    { id: 28, name: 'Action', color: 'from-orange-500/20 to-red-500/20 border-orange-500/30 text-orange-400' },
+    { id: 878, name: 'Sci-Fi', color: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-400' },
+    { id: 16, name: 'Animation', color: 'from-pink-500/20 to-rose-500/20 border-pink-500/30 text-pink-400' },
+    { id: 35, name: 'Comedy', color: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/30 text-yellow-400' },
+    { id: 18, name: 'Drama', color: 'from-indigo-500/20 to-violet-500/20 border-indigo-500/30 text-indigo-400' },
+    { id: 27, name: 'Horror', color: 'from-rose-500/20 to-red-700/20 border-rose-500/30 text-rose-400' },
+    { id: 53, name: 'Thriller', color: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400' },
+    { id: 14, name: 'Fantasy', color: 'from-purple-500/20 to-fuchsia-500/20 border-purple-500/30 text-purple-400' },
+  ];
 
   return (
-    <main className="bg-gradient-to-l from-red-900 to-blue-900 text-white">
-      <Snowfall/>
-      <section className="relative h-[600px] w-full flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-950 to-slate-900">
-      <Snowfall/>
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 1 }}
-    className="z-10 text-center px-6 max-w-4xl mx-auto space-y-6"
-  >
-    <motion.h1
-      className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-gray-100"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4, duration: 0.8 }}
-    >
-      Discover Your Next Favorite
-      <span className="block text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-slate-400 mt-2">
-        MOVIE
-      </span>
-    </motion.h1>
+    <main className="bg-background text-foreground min-h-screen">
+      {/* 1. Cinematic Hero Section */}
+      <Hero />
 
-    <motion.p
-      className="text-lg text-gray-400 max-w-2xl mx-auto"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.8, duration: 0.8 }}
-    >
-      MovieQuest's AI-powered platform helps you discover perfect movies based on your taste,
-      mood, and available streaming services.
-    </motion.p>
-
-    <motion.div
-      className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1, duration: 0.8 }}
-    >
-      <Link href="/search" passHref>
-        <Button
-          size="lg"
-          className="px-8 py-6 rounded-full text-lg font-medium bg-indigo-700 hover:bg-indigo-600 transition-all shadow-md hover:shadow-lg text-white"
-        >
-          <Search className="mr-2 h-5 w-5" /> Explore Movies
-        </Button>
-      </Link>
-      <Link href="/genres" passHref>
-        <Button
-          variant="outline"
-          size="lg"
-          className="px-8 py-6 rounded-full text-lg font-medium bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-gray-400 transition-all"
-        >
-          <Film className="mr-2 h-5 w-5" /> Browse Genres
-        </Button>
-      </Link>
-    </motion.div>
-  </motion.div>
-
-  <motion.div
-    className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
-    animate={{ y: [0, 10, 0] }}
-    transition={{ repeat: Infinity, duration: 2 }}
-  >
-    <svg width="24" height="40" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="22" height="38" rx="11" stroke="white" strokeOpacity="0.15" strokeWidth="2" />
-      <motion.circle
-        cx="12"
-        cy="12"
-        r="6"
-        fill="white"
-        fillOpacity="0.6"
-        animate={{ y: [0, 15, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-      />
-    </svg>
-  </motion.div>
-</section>
-
-
-      <section className="py-20 bg-gradient-to-b from-gray-900 to-indigo-950/40">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            {stats.map((stat) => (
-              <motion.div 
-                key={stat.name}
-                variants={itemVariants}
-                className="bg-indigo-900/20 backdrop-blur-sm rounded-xl p-6 border border-indigo-800/30 shadow-lg"
-              >
-                <div className="flex items-center space-x-4">
-                  {stat.icon}
-                  <div>
-                    <h3 className="text-3xl font-bold text-white">{stat.value}</h3>
-                    <p className="text-indigo-300 text-sm">{stat.name}</p>
-                  </div>
-                </div>
-              </motion.div>
+      {/* 2. Trending Movies Carousel */}
+      {isTrendingLoading ? (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+          <Skeleton className="h-8 w-60 rounded-xl" />
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-72 w-48 rounded-2xl flex-shrink-0" />
             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-24 bg-gray-900 text-white">
-      
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold">Why Choose MovieQuest?</h2>
-            <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
-              Our platform combines cutting-edge technology with a passion for cinema to deliver the ultimate movie discovery experience.
-            </p>
-          </motion.div>
-
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            {benefits.map((benefit, index) => (
-              <motion.div 
-                key={index}
-                variants={itemVariants}
-                className="bg-indigo-950/30 border border-indigo-900/20 rounded-xl p-6 hover:bg-indigo-900/20 transition-all duration-300"
-              >
-                <div className="flex items-start space-x-4">
-                  {benefit.icon}
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">{benefit.title}</h3>
-                    <p className="text-gray-400">{benefit.description}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <TestimonialSection/>
-
-      <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-950 text-white">
-      <div className="max-w-5xl mx-auto px-6 text-center">
-        <div className="space-y-8">
-          <h2 className="text-4xl sm:text-5xl font-light">Ready to Transform Your Movie Experience?</h2>
-          <div className="w-16 h-px bg-gray-600 mx-auto"></div>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto font-light">
-            Join thousands of film enthusiasts who have discovered their perfect next watch with MovieQuest
-          </p>
-          
-          <div className="pt-4">
-            <Button 
-              size="lg" 
-              className="px-12 py-6 text-lg font-light bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:scale-105"
-              onClick={() => window.location.href = "/search"}
-            >
-              Start Exploring Now
-            </Button>
           </div>
-          
-          <p className="text-sm text-gray-500 mt-6 font-light">
-            No credit card required. Begin discovering movies instantly.
-          </p>
         </div>
-      </div>
-    </section>
+      ) : (
+        <MovieCarousel
+          title="Trending This Week"
+          subtitle="The most popular movies buzzing right now"
+          icon={<Flame className="h-6 w-6" />}
+          movies={trendingData?.results || []}
+          viewAllHref="/search"
+        />
+      )}
+
+      {/* 3. Quick Browse By Genre Pills */}
+      <section className="py-10 border-y border-border/40 bg-card/30 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Compass className="h-5 w-5 text-primary" />
+                Popular Genres
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Jump straight into your favorite cinema categories
+              </p>
+            </div>
+            <Link
+              href="/genres"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline group"
+            >
+              <span>Explore all genres</span>
+              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            {featuredGenres.map((g) => (
+              <Link
+                key={g.id}
+                href={`/genres/${g.id}`}
+                className={`p-3 rounded-xl border bg-gradient-to-br ${g.color} hover:scale-105 transition-all text-center flex flex-col items-center justify-center gap-1 shadow-sm`}
+              >
+                <span className="text-xs sm:text-sm font-bold">{g.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Top Rated Masterpieces Carousel */}
+      {isTopRatedLoading ? (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+          <Skeleton className="h-8 w-60 rounded-xl" />
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-72 w-48 rounded-2xl flex-shrink-0" />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <MovieCarousel
+          title="Top Rated Masterpieces"
+          subtitle="Critically acclaimed films with highest audience scores"
+          icon={<Star className="h-6 w-6" />}
+          movies={topRatedData?.results || []}
+          viewAllHref="/search"
+        />
+      )}
+
+      {/* 5. In Theatres Now Carousel */}
+      {isNowPlayingLoading ? (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+          <Skeleton className="h-8 w-60 rounded-xl" />
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-72 w-48 rounded-2xl flex-shrink-0" />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <MovieCarousel
+          title="In Theatres & Recent"
+          subtitle="Fresh releases currently capturing cinema screens"
+          icon={<Clapperboard className="h-6 w-6" />}
+          movies={nowPlayingData?.results || []}
+          viewAllHref="/search"
+        />
+      )}
+
+      {/* 6. Platform Stats */}
+      <section className="py-14 border-t border-border/40 bg-gradient-to-b from-background to-muted/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {stats.map((s) => (
+              <StatCard key={s.name} {...s} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Why MovieQuest Features / Benefits */}
+      <section className="py-16 border-t border-border/40 bg-card/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Engineered for True <span className="text-primary">Film Lovers</span>
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Everything you need to discover, track, and watch unforgettable cinema.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {benefits.map((b) => (
+              <BenefitCard key={b.title} {...b} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 8. Testimonials Section */}
+      <TestimonialSection />
     </main>
   );
 }

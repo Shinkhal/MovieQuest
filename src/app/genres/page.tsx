@@ -1,107 +1,64 @@
-// app/genres/page.tsx
-"use client";
+import { getGenresServer } from '@/lib/api';
+import { GenreCard } from '@/components/genres/GenreCard';
+import { Sparkles, Film } from 'lucide-react';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
+const FALLBACK_GENRES = [
+  { id: 28, name: 'Action' },
+  { id: 12, name: 'Adventure' },
+  { id: 16, name: 'Animation' },
+  { id: 35, name: 'Comedy' },
+  { id: 80, name: 'Crime' },
+  { id: 99, name: 'Documentary' },
+  { id: 18, name: 'Drama' },
+  { id: 10751, name: 'Family' },
+  { id: 14, name: 'Fantasy' },
+  { id: 36, name: 'History' },
+  { id: 27, name: 'Horror' },
+  { id: 10402, name: 'Music' },
+  { id: 9648, name: 'Mystery' },
+  { id: 10749, name: 'Romance' },
+  { id: 878, name: 'Science Fiction' },
+  { id: 10770, name: 'TV Movie' },
+  { id: 53, name: 'Thriller' },
+  { id: 10752, name: 'War' },
+  { id: 37, name: 'Western' },
+];
 
-// API constants
-const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY ;
-const BASE_URL = 'https://api.themoviedb.org/3';
-
-// Type for genre
-interface Genre {
-  id: number;
-  name: string;
-}
-
-// Genre backgrounds for visual appeal
-const genreBackgrounds: Record<number, string> = {
-  28: 'from-red-500 to-red-700', // Action
-  12: 'from-amber-500 to-amber-700', // Adventure
-  16: 'from-blue-400 to-blue-600', // Animation
-  35: 'from-yellow-400 to-yellow-600', // Comedy
-  80: 'from-slate-600 to-slate-800', // Crime
-  99: 'from-emerald-500 to-emerald-700', // Documentary
-  18: 'from-purple-500 to-purple-700', // Drama
-  10751: 'from-green-400 to-green-600', // Family
-  14: 'from-indigo-500 to-indigo-700', // Fantasy
-  36: 'from-stone-500 to-stone-700', // History
-  27: 'from-black to-gray-800', // Horror
-  10402: 'from-pink-400 to-pink-600', // Music
-  9648: 'from-violet-600 to-violet-800', // Mystery
-  10749: 'from-rose-400 to-rose-600', // Romance
-  878: 'from-cyan-500 to-cyan-700', // Science Fiction
-  10770: 'from-gray-400 to-gray-600', // TV Movie
-  53: 'from-orange-500 to-orange-700', // Thriller
-  10752: 'from-stone-600 to-stone-800', // War
-  37: 'from-amber-600 to-amber-800', // Western
+export const metadata = {
+  title: 'Browse Movie Genres | MovieQuest',
+  description: 'Explore movies across all genres - Action, Sci-Fi, Drama, Comedy, Horror, Romance, and more.',
 };
 
-export default function GenresPage() {
-  const [genres, setGenres] = useState<Genre[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}/genre/movie/list?api_key=${API_KEY}`
-        );
-        const data = await response.json();
-        setGenres(data.genres);
-      } catch (error) {
-        console.error("Failed to fetch genres:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGenres();
-  }, []);
+export default async function GenresPage() {
+  const fetchedGenres = await getGenresServer();
+  const genres = fetchedGenres.length > 0 ? fetchedGenres : FALLBACK_GENRES;
 
   return (
-    <div className="min-h-screen bg-gray-800">
-      {/* Header */}
-      <div className=" py-12 mb-8">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Browse Movies by Genre
+    <main className="min-h-screen bg-background text-foreground pb-20">
+      {/* Hero Header */}
+      <section className="relative py-16 px-4 border-b border-border/40 bg-gradient-to-b from-primary/10 via-background to-background">
+        <div className="max-w-5xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+            <Sparkles className="h-3.5 w-3.5" />
+            Curated Categories
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
+            Explore by <span className="text-primary">Genre</span>
           </h1>
-          <p className="text-xl text-gray-200 max-w-2xl mx-auto">
-            Discover new favorites by exploring our collection of movies sorted by genre
+          <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
+            From adrenaline-packed action blockbusters to heartwarming indie dramas, find movies tailored to your exact mood.
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="container mx-auto px-4 pb-12">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {genres.map((genre) => (
-              <Link href={`/genres/${genre.id}`} key={genre.id}>
-                <Card className="overflow-hidden hover:shadow-xl transition duration-300 h-full 
-  backdrop-blur-md bg-white/5 border border-white/10 shadow-md rounded-xl text-white">
-
-                  <div className={`h-30 bg-gradient-to-r ${genreBackgrounds[genre.id] || 'from-gray-500 to-gray-700'}`}>
-                    <div className="h-full flex items-center justify-center">
-                      <h2 className="text-2xl font-bold text-white">{genre.name}</h2>
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <p className="text-sm text-slate-300">
-                      Explore {genre.name} movies and discover new favorites in this category.
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
+      {/* Genre Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {genres.map((genre) => (
+            <GenreCard key={genre.id} genre={genre} />
+          ))}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

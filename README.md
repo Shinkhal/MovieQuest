@@ -1,107 +1,106 @@
-
 # 🎬 MovieQuest
 
-MovieQuest is a modern, responsive, and high-performance movie discovery platform built with Next.js and TypeScript. It uses the TMDB API to let users explore movies by genre, popularity, trending status, and ratings — all in a sleek dark-themed UI.
-
-![image](https://github.com/user-attachments/assets/9fef2873-d5ee-48f6-880f-4b97c4c01a4e)
-
-
-## 🚀 Live Demo
-
-👉 [movies-quest.vercel.app](https://movies-quest.vercel.app)
+MovieQuest is a modern, responsive, and high-performance movie discovery platform built with Next.js 15, React 19, TypeScript, and Tailwind CSS v4. It empowers film enthusiasts with cinematic discovery, Google OAuth authentication, cloud-synced watchlists backed by MongoDB, community reviews, and shareable Cinephile Passports.
 
 ---
 
-## 🌟 Features
+## 🚀 Live Demo
 
-- 🔍 **Search Movies** by title with autocomplete support
-- 📊 **Filter** by Trending, Popular, and Top Rated
-- 🎭 **Browse by Genre** dynamically
-- 🎥 **Detailed Movie Pages** with ratings, overviews, release date, and more
-- 💡 **Responsive Design** optimized for mobile, tablet, and desktop
-- ⚙️ **Performance Optimized** with lazy loading, code splitting, and image optimization
-- 🧩 **Error Handling** for API and routing edge cases
+👉 **[movies-quest.vercel.app](https://movies-quest.vercel.app)**
+
+---
+
+## 🌟 Key Features
+
+- 🔍 **Real-Time Movie Discovery**: Search by title, explore trending blockbusters, and filter by 19+ curated genres.
+- 🔐 **Auth.js (NextAuth v5) Authentication**: Secure sign-in with Google OAuth and Guest Cinephile fallback access.
+- 🗄️ **MongoDB Cloud Watchlist**: Synchronize your saved movies across devices in real-time.
+- 🌟 **Cinephile Passports & Profiles (`/profile`)**:
+  - Holographic glassmorphic passport card showcasing avatar, verified badge, top genres, and all-time favorite movie.
+  - Dynamic Cinephile Ranks (*Novice Filmgoer* ➔ *Dedicated Cinephile* ➔ *Cinema Connoisseur* ➔ *Cinema Virtuoso*).
+  - Public profile and watchlist sharing (`/profile/[id]`) with one-click social sharing to X (Twitter).
+- ⭐ **Movie Ratings & Reviews**: Post star ratings and film critiques across movie detail pages.
+- 🎥 **Rich Movie Details**: Cast & crew carousels, official YouTube trailers, streaming/rental provider feeds, and financial trivia.
+- 🌓 **Theme Customization**: Fluid dark and light mode toggle with system preference detection.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org/)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **API:** [TMDB API](https://www.themoviedb.org/documentation/api)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Icons:** [Lucide](https://lucide.dev/)
-- **Font Optimization:** `next/font`
+- **Framework:** [Next.js 15 (App Router)](https://nextjs.org/)
+- **Frontend:** [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS v4](https://tailwindcss.com/)
+- **Authentication:** [Auth.js (NextAuth v5)](https://authjs.dev/)
+- **Database:** [MongoDB Atlas](https://www.mongodb.com/atlas) with [Mongoose](https://mongoosejs.com/)
+- **API & Data Fetching:** [TMDB API](https://www.themoviedb.org/documentation/api), [TanStack React Query](https://tanstack.com/query/latest), [Axios](https://axios-http.com/)
+- **Icons & UI:** [Lucide Icons](https://lucide.dev/), [Radix UI](https://www.radix-ui.com/), [Sonner Toasts](https://sonner.emilkowal.ski/)
 - **Deployment:** [Vercel](https://vercel.com)
-
----
-
-## 📁 Folder Structure
-
-```
-
-MovieQuest/
-├── public/             # Static assets
-├── src/
-│   ├── app/            # App Router pages
-│   ├── components/     # Reusable UI components
-│   ├── lib/            # API utilities, constants
-├── next.config.ts      # Next.js config
-├── postcss.config.mjs  # Tailwind/PostCSS config
-├── tsconfig.json       # TypeScript config
-
-````
-
----
-
-## 🧪 Getting Started
-
-To run the project locally:
-
-```bash
-# Clone the repo
-git clone https://github.com/Shinkhal/MovieQuest.git
-cd MovieQuest
-
-# Install dependencies
-npm install
-
-# Add your TMDB API key in environment variables
-touch .env.local
-# Add: NEXT_PUBLIC_TMDB_API_KEY=your_api_key_here
-
-# Run the app
-npm run dev
-
-# Open http://localhost:3000 in your browser
-````
 
 ---
 
 ## 📦 Environment Variables
 
-Create a `.env.local` file in the root directory and add:
+Create a `.env.local` file by copying the included template, then fill in your credentials:
 
-```env
-NEXT_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
+```bash
+cp .env.example .env.local
 ```
 
-Get your API key from [The Movie Database](https://www.themoviedb.org/documentation/api).
+```env
+# TMDB API (Server-only; kept secure on server side)
+TMDB_API_KEY=your_tmdb_api_key
+
+# MongoDB Database Connection (Server-only; MUST NOT be prefixed with NEXT_PUBLIC_)
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/moviequest?retryWrites=true&w=majority
+
+# Auth.js / NextAuth Configuration (Required in production — generate with: openssl rand -base64 32)
+AUTH_SECRET=your_generated_auth_secret_key
+AUTH_URL=https://movies-quest.vercel.app
+
+# Google OAuth Credentials (optional — guest login works without these)
+AUTH_GOOGLE_ID=your_google_oauth_client_id.apps.googleusercontent.com
+AUTH_GOOGLE_SECRET=your_google_oauth_client_secret
+
+# Web3Forms Contact Form Key (server-side delivery)
+FORM_KEY=your_web3forms_access_key
+
+# Optional Application URL
+NEXT_PUBLIC_APP_URL=https://movies-quest.vercel.app
+```
 
 ---
 
-## ✨ Future Improvements
+## 🔑 Google OAuth Setup Guide
 
-* 🔐 Add user authentication (favorites, watchlist)
-* 📽️ Integrate trailers with YouTube embeds
-* 📱 Convert to PWA for offline support
-* 🧠 Add AI-powered recommendations
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Create an **OAuth 2.0 Client ID** (Web Application).
+3. Under **Authorized JavaScript origins**, add:
+   - `http://localhost:3000`
+   - `https://movies-quest.vercel.app`
+4. Under **Authorized redirect URIs**, add:
+   - `http://localhost:3000/api/auth/callback/google`
+   - `https://movies-quest.vercel.app/api/auth/callback/google`
+5. Copy your Client ID and Client Secret into your `.env.local` or Vercel Environment Variables.
 
 ---
 
-## 🙌 Contributing
+## 🧪 Getting Started Locally
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you’d like to change.
+```bash
+# 1. Clone repository
+git clone https://github.com/Shinkhal/MovieQuest.git
+cd MovieQuest
+
+# 2. Install dependencies
+npm install
+
+# 3. Setup environment variables
+cp .env.example .env.local
+
+# 4. Start local development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
@@ -114,5 +113,3 @@ This project is licensed under the [MIT License](LICENSE).
 ## 💬 Connect with Me
 
 Created with 💙 by [Shinkhal Sinha](https://shinkhal-sinha.online)
-
-
