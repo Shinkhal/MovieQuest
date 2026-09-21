@@ -41,6 +41,7 @@ export function TrailerModal({ isOpen, onClose, trailerKey }: TrailerModalProps)
         </Button>
         <div className="aspect-video w-full rounded-lg overflow-hidden">
           <iframe
+            title="Official Movie Trailer"
             src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
             className="w-full h-full"
             allowFullScreen

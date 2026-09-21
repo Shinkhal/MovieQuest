@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
-import { signIn } from 'next-auth/react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { signIn, getProviders } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,17 @@ function SignInContent() {
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const [guestName, setGuestName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hasGoogleProvider, setHasGoogleProvider] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    getProviders()
+      .then((providers) => {
+        setHasGoogleProvider(Boolean(providers?.google));
+      })
+      .catch(() => {
+        setHasGoogleProvider(false);
+      });
+  }, []);
 
   const handleGoogleSignIn = () => {
     setLoading(true);
@@ -78,23 +89,27 @@ function SignInContent() {
           </p>
         </div>
 
-        {/* Google OAuth Button */}
+        {/* Auth Options */}
         <div className="space-y-4">
-          <Button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            variant="outline"
-            className="w-full py-6 rounded-2xl border-border/80 hover:bg-muted font-semibold text-sm shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2"
-          >
-            <GoogleIcon />
-            <span>Continue with Google</span>
-          </Button>
+          {hasGoogleProvider && (
+            <>
+              <Button
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                variant="outline"
+                className="w-full py-6 rounded-2xl border-border/80 hover:bg-muted font-semibold text-sm shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <GoogleIcon />
+                <span>Continue with Google</span>
+              </Button>
 
-          <div className="relative flex items-center justify-center text-xs uppercase">
-            <div className="w-full border-t border-border/60" />
-            <span className="bg-card px-3 text-muted-foreground font-medium">Or Quick Guest Login</span>
-            <div className="w-full border-t border-border/60" />
-          </div>
+              <div className="relative flex items-center justify-center text-xs uppercase">
+                <div className="w-full border-t border-border/60" />
+                <span className="bg-card px-3 text-muted-foreground font-medium">Or Quick Guest Login</span>
+                <div className="w-full border-t border-border/60" />
+              </div>
+            </>
+          )}
 
           {/* Quick Cinephile Form */}
           <form onSubmit={handleGuestSignIn} className="space-y-3.5">

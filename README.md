@@ -46,8 +46,8 @@ cp .env.example .env.local
 ```
 
 ```env
-# TMDB API
-NEXT_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
+# TMDB API (Server-only; kept secure on server side)
+TMDB_API_KEY=your_tmdb_api_key
 
 # MongoDB Database Connection (Server-only; MUST NOT be prefixed with NEXT_PUBLIC_)
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/moviequest?retryWrites=true&w=majority
@@ -60,8 +60,8 @@ AUTH_URL=https://movies-quest.vercel.app
 AUTH_GOOGLE_ID=your_google_oauth_client_id.apps.googleusercontent.com
 AUTH_GOOGLE_SECRET=your_google_oauth_client_secret
 
-# Web3Forms Contact Form Key (required for /contact form delivery)
-NEXT_PUBLIC_FORM_KEY=your_web3forms_access_key
+# Web3Forms Contact Form Key (server-side delivery)
+FORM_KEY=your_web3forms_access_key
 
 # Optional Application URL
 NEXT_PUBLIC_APP_URL=https://movies-quest.vercel.app

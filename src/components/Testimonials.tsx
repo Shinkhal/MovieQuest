@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession, signIn } from 'next-auth/react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Star, Edit3, MessageSquare, Sparkles } from 'lucide-react';
+import { Star, Edit3, MessageSquare, Sparkles, User, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -71,6 +72,7 @@ const DEFAULT_TESTIMONIALS = [
 ];
 
 export default function TestimonialSection() {
+  const { data: session } = useSession();
   const { data: fetchedTestimonials = [], isLoading } = useTestimonials();
   const submitMutation = useSubmitTestimonial();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -80,6 +82,12 @@ export default function TestimonialSection() {
     feedback: '',
   });
 
+  useEffect(() => {
+    if (session?.user?.name && !formData.name) {
+      setFormData((prev) => ({ ...prev, name: session.user.name || '' }));
+    }
+  }, [session?.user?.name]);
+
   const testimonials =
     fetchedTestimonials.length > 0
       ? [...fetchedTestimonials, ...DEFAULT_TESTIMONIALS]
@@ -87,6 +95,10 @@ export default function TestimonialSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session?.user) {
+      signIn();
+      return;
+    }
     if (!formData.name || !formData.role || !formData.feedback) {
       toast.error('Please fill all required fields');
       return;
@@ -100,7 +112,7 @@ export default function TestimonialSection() {
         avatar: formData.name.charAt(0).toUpperCase(),
       });
       toast.success('Testimonial submitted successfully!');
-      setFormData({ name: '', role: 'Film Lover', feedback: '' });
+      setFormData({ name: session?.user?.name || '', role: 'Film Lover', feedback: '' });
       setIsDialogOpen(false);
     } catch (error) {
       toast.error('Failed to submit testimonial. Please try again.');
@@ -196,71 +208,92 @@ export default function TestimonialSection() {
                   </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="name" className="text-xs font-semibold text-muted-foreground">
-                      Full Name *
-                    </Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Your name"
-                      className="rounded-xl bg-background border-border/80"
-                      required
-                    />
-                  </div>
+                {session?.user ? (
+                  <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="text-xs font-semibold text-muted-foreground">
+                        Full Name *
+                      </Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Your name"
+                        className="rounded-xl bg-background border-border/80"
+                        required
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="role" className="text-xs font-semibold text-muted-foreground">
-                      Role / Profile *
-                    </Label>
-                    <select
-                      id="role"
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full bg-background border border-border/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-foreground outline-none focus:border-primary"
-                    >
-                      <option value="Film Lover">Film Lover</option>
-                      <option value="Casual Viewer">Casual Viewer</option>
-                      <option value="Film Critic">Film Critic</option>
-                      <option value="Cinephile">Cinephile</option>
-                    </select>
-                  </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="role" className="text-xs font-semibold text-muted-foreground">
+                        Role / Profile *
+                      </Label>
+                      <select
+                        id="role"
+                        value={formData.role}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                        className="w-full bg-background border border-border/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-foreground outline-none focus:border-primary"
+                      >
+                        <option value="Film Lover">Film Lover</option>
+                        <option value="Casual Viewer">Casual Viewer</option>
+                        <option value="Film Critic">Film Critic</option>
+                        <option value="Cinephile">Cinephile</option>
+                      </select>
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="feedback" className="text-xs font-semibold text-muted-foreground">
-                      Your Testimonial *
-                    </Label>
-                    <Textarea
-                      id="feedback"
-                      value={formData.feedback}
-                      onChange={(e) => setFormData({ ...formData, feedback: e.target.value })}
-                      placeholder="What do you love about MovieQuest?"
-                      rows={4}
-                      className="rounded-xl bg-background border-border/80 resize-none text-xs sm:text-sm"
-                      required
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="feedback" className="text-xs font-semibold text-muted-foreground">
+                        Your Testimonial *
+                      </Label>
+                      <Textarea
+                        id="feedback"
+                        value={formData.feedback}
+                        onChange={(e) => setFormData({ ...formData, feedback: e.target.value })}
+                        placeholder="What do you love about MovieQuest?"
+                        rows={4}
+                        className="rounded-xl bg-background border-border/80 resize-none text-xs sm:text-sm"
+                        required
+                      />
+                    </div>
 
-                  <div className="flex justify-end gap-2 pt-3">
+                    <div className="flex justify-end gap-2 pt-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsDialogOpen(false)}
+                        className="rounded-xl"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={submitMutation.isPending}
+                        className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                      >
+                        {submitMutation.isPending ? 'Submitting...' : 'Submit'}
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="py-6 text-center space-y-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+                      <User className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-foreground">Sign In Required</p>
+                      <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                        Please sign in with Google or as a guest cinephile to share your thoughts with the community.
+                      </p>
+                    </div>
                     <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
-                      className="rounded-xl"
+                      onClick={() => signIn()}
+                      className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm shadow-md gap-2"
                     >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={submitMutation.isPending}
-                      className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
-                    >
-                      {submitMutation.isPending ? 'Submitting...' : 'Submit'}
+                      <LogIn className="h-4 w-4" />
+                      <span>Sign In to Leave Feedback</span>
                     </Button>
                   </div>
-                </form>
+                )}
               </DialogContent>
             </Dialog>
           </div>

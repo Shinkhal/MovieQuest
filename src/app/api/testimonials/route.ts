@@ -7,7 +7,10 @@ import { sanitizeText } from '@/lib/utils';
 export async function GET() {
   try {
     await connectToDatabase();
-    const testimonials = await Testimonial.find().sort({ createdAt: -1 }).limit(50);
+    const testimonials = await Testimonial.find()
+      .select('-userEmail')
+      .sort({ createdAt: -1 })
+      .limit(50);
     return NextResponse.json({ testimonials }, { status: 200 });
   } catch (error) {
     console.error('Failed to fetch testimonials:', error);

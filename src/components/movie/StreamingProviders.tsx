@@ -48,7 +48,7 @@ function openStreamingService(providerName: string, movie: Movie) {
   const url =
     providerUrls[providerName] ||
     `https://www.google.com/search?q=where+to+watch+${encodeURIComponent(movie.title)}+${encodeURIComponent(year)}+online`;
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 export function StreamingProviders({ movie }: { movie: Movie }) {

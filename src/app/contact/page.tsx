@@ -68,7 +68,7 @@ export default function ContactPage() {
     },
     {
       q: 'How does the Watchlist work?',
-      a: 'Your watchlist is saved securely in your browser’s local storage, meaning you can access your saved films anytime without needing an account.',
+      a: 'Guest visitors can save movies locally in their browser without an account. Once you sign in with Google or as a guest cinephile, your watchlist is automatically synced to your cloud account so you can access your saved films across any device.',
     },
   ];
 
