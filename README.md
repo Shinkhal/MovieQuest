@@ -6,7 +6,7 @@ MovieQuest is a modern, responsive, and high-performance movie discovery platfor
 
 ## 🚀 Live Demo
 
-👉 **[movies-quest.vercel.app](https://movies-quest.vercel.app)**
+👉 **[moviequests.vercel.app](https://moviequests.vercel.app)**
 
 ---
 
@@ -54,7 +54,7 @@ MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/moviequest?r
 
 # Auth.js / NextAuth Configuration (Required in production — generate with: openssl rand -base64 32)
 AUTH_SECRET=your_generated_auth_secret_key
-AUTH_URL=https://movies-quest.vercel.app
+AUTH_URL=https://moviequests.vercel.app
 
 # Google OAuth Credentials (optional — guest login works without these)
 AUTH_GOOGLE_ID=your_google_oauth_client_id.apps.googleusercontent.com
@@ -64,7 +64,7 @@ AUTH_GOOGLE_SECRET=your_google_oauth_client_secret
 FORM_KEY=your_web3forms_access_key
 
 # Optional Application URL
-NEXT_PUBLIC_APP_URL=https://movies-quest.vercel.app
+NEXT_PUBLIC_APP_URL=https://moviequests.vercel.app
 ```
 
 ---
@@ -75,10 +75,10 @@ NEXT_PUBLIC_APP_URL=https://movies-quest.vercel.app
 2. Create an **OAuth 2.0 Client ID** (Web Application).
 3. Under **Authorized JavaScript origins**, add:
    - `http://localhost:3000`
-   - `https://movies-quest.vercel.app`
+   - `https://moviequests.vercel.app`
 4. Under **Authorized redirect URIs**, add:
    - `http://localhost:3000/api/auth/callback/google`
-   - `https://movies-quest.vercel.app/api/auth/callback/google`
+   - `https://moviequests.vercel.app/api/auth/callback/google`
 5. Copy your Client ID and Client Secret into your `.env.local` or Vercel Environment Variables.
 
 ---

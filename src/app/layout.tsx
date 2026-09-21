@@ -38,12 +38,12 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Shinkhal Sinha" }],
   creator: "MovieQuest",
-  metadataBase: new URL("https://movies-quest.vercel.app"),
+  metadataBase: new URL("https://moviequests.vercel.app"),
   openGraph: {
     title: "MovieQuest | Find Your Next Favorite Film",
     description:
       "Discover, explore and share your favorite movies with MovieQuest - your personalized film recommendation platform.",
-    url: "https://movies-quest.vercel.app",
+    url: "https://moviequests.vercel.app",
     siteName: "MovieQuest",
     type: "website",
     locale: "en_US",
@@ -98,10 +98,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "MovieQuest",
-              url: "https://movies-quest.vercel.app",
+              url: "https://moviequests.vercel.app",
               potentialAction: {
                 "@type": "SearchAction",
-                target: "https://movies-quest.vercel.app/search?q={search_term_string}",
+                target: "https://moviequests.vercel.app/search?q={search_term_string}",
                 "query-input": "required name=search_term_string",
               },
             }),
