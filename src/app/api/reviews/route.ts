@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import Review from '@/models/review';
+import { sanitizeText } from '@/lib/utils';
 
 export async function GET(req: Request) {
   try {
@@ -42,8 +43,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const trimmedComment = typeof comment === 'string' ? comment.trim() : '';
-    if (!trimmedComment || trimmedComment.length < 3 || trimmedComment.length > 1000) {
+    const sanitizedComment = sanitizeText(comment);
+    if (!sanitizedComment || sanitizedComment.length < 3 || sanitizedComment.length > 1000) {
       return NextResponse.json(
         { error: 'Review comment must be between 3 and 1000 characters' },
         { status: 400 }
@@ -52,23 +53,24 @@ export async function POST(req: Request) {
 
     await connectToDatabase();
 
-    const userName = session.user.name || 'Cinephile';
+    const userName = sanitizeText(session.user.name || 'Cinephile').slice(0, 50);
     const userEmail = session.user.email || '';
     const userAvatar =
       session.user.image ||
       (userName ? userName.charAt(0).toUpperCase() : 'C');
     const userId = session.user.id || session.user.email;
+    const sanitizedTitle = sanitizeText(movieTitle || 'Movie').slice(0, 200);
 
     const newReview = await Review.create({
       movieId: Number(movieId),
-      movieTitle: typeof movieTitle === 'string' ? movieTitle.slice(0, 200) : 'Movie',
+      movieTitle: sanitizedTitle,
       userId,
-      userName: userName.slice(0, 50),
+      userName,
       userAvatar,
       userEmail,
       role: 'Cinephile',
       rating: numRating,
-      comment: trimmedComment,
+      comment: sanitizedComment,
     });
 
     const reviewObj = newReview.toObject();

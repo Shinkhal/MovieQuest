@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import UserProfile from "@/models/userProfile";
 import Watchlist from "@/models/watchlist";
 import Review from "@/models/review";
+import { sanitizeText } from "@/lib/utils";
 
 function calculateRank(watchlistCount: number, reviewCount: number): string {
   const totalActivity = watchlistCount + reviewCount * 2;
@@ -150,18 +151,24 @@ export async function POST(request: Request) {
     const reviewCount = await Review.countDocuments({ userId });
     const rankBadge = calculateRank(moviesCount, reviewCount);
 
+    const sanitizedName = sanitizeText(name || session.user.name || "Film Buff").slice(0, 50);
+    const sanitizedBio = sanitizeText(bio).slice(0, 300);
+    const sanitizedFavMovie = sanitizeText(favoriteMovie).slice(0, 100);
+    const sanitizedTwitter = sanitizeText(twitterUsername).replace(/^@/, "").slice(0, 50);
+    const sanitizedLetterboxd = sanitizeText(letterboxdUsername).slice(0, 50);
+
     const updatedProfile = await UserProfile.findOneAndUpdate(
       { userId },
       {
         $set: {
-          name: typeof name === 'string' ? name.slice(0, 50) : session.user.name || "Film Buff",
+          name: sanitizedName,
           email: session.user.email,
           image: typeof image === 'string' ? image.slice(0, 500) : session.user.image,
-          bio: typeof bio === "string" ? bio.slice(0, 300) : "",
-          favoriteMovie: typeof favoriteMovie === "string" ? favoriteMovie.slice(0, 100) : "",
+          bio: sanitizedBio,
+          favoriteMovie: sanitizedFavMovie,
           favoriteGenres: Array.isArray(favoriteGenres) ? favoriteGenres.slice(0, 6) : [],
-          twitterUsername: typeof twitterUsername === "string" ? twitterUsername.replace(/^@/, "").trim().slice(0, 50) : "",
-          letterboxdUsername: typeof letterboxdUsername === "string" ? letterboxdUsername.trim().slice(0, 50) : "",
+          twitterUsername: sanitizedTwitter,
+          letterboxdUsername: sanitizedLetterboxd,
           isPublic: isPublic !== false,
           rankBadge,
         },

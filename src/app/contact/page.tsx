@@ -23,20 +23,13 @@ export default function ContactPage() {
     setLoading(true);
 
     try {
-      const formKey = process.env.NEXT_PUBLIC_FORM_KEY;
-      if (!formKey) {
-        toast.error('Contact form is not configured. Please email shinkhalsinha@gmail.com directly.');
-        return;
-      }
-
-      const response = await fetch('https://api.web3forms.com/submit', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          access_key: formKey,
           name: formData.name,
           email: formData.email,
           subject: formData.subject || 'MovieQuest Inquiry',
@@ -46,11 +39,11 @@ export default function ContactPage() {
 
       const result = await response.json();
 
-      if (result.success) {
-        toast.success('Thank you! Your message has been sent successfully.');
+      if (response.ok && result.success) {
+        toast.success(result.message || 'Thank you! Your message has been sent successfully.');
         setFormData({ name: '', email: '', subject: '', message: '' });
       } else {
-        toast.error(result.message || 'Failed to deliver message. Please reach out directly to shinkhalsinha@gmail.com');
+        toast.error(result.error || 'Failed to deliver message. Please reach out directly to shinkhalsinha@gmail.com');
       }
     } catch (err) {
       toast.error('Network error. Please try again or email shinkhalsinha@gmail.com directly.');

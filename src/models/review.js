@@ -15,4 +15,7 @@ const ReviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ReviewSchema.index({ userId: 1, createdAt: -1 });
+ReviewSchema.index({ movieId: 1, createdAt: -1 });
+
 export default mongoose.models.Review || mongoose.model("Review", ReviewSchema);

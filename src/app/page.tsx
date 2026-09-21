@@ -7,7 +7,7 @@ import { MovieCarousel } from '@/components/home/MovieCarousel';
 import { StatCard } from '@/components/home/StatCard';
 import { BenefitCard } from '@/components/home/BenefitCard';
 import TestimonialSection from '@/components/Testimonials';
-import { useMovies, useGenres } from '@/lib/api';
+import { useMovies } from '@/lib/api';
 import {
   Film,
   Sparkles,
@@ -34,7 +34,6 @@ export default function Home() {
   const { data: nowPlayingData, isLoading: isNowPlayingLoading } = useMovies({
     type: 'now_playing',
   });
-  const { data: genres = [] } = useGenres();
 
   const stats = [
     {

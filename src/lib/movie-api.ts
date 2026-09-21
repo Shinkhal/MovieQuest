@@ -3,7 +3,7 @@ import { cache } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Movie } from '@/types/api';
 
-const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 /**
  * Fetch full movie details with credits, videos, watch providers, and similar movies in a single TMDB request.
@@ -29,9 +29,13 @@ export function useMovieDetail(id: string | number) {
   return useQuery<Movie, Error, Movie>({
     queryKey: ['movie', id],
     queryFn: async () => {
-      const baseUrl = 'https://api.themoviedb.org/3';
-      const url = `${baseUrl}/movie/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos,similar,watch/providers&language=en-US`;
-      const { data } = await axios.get(url);
+      const path = `/movie/${id}`;
+      const params = new URLSearchParams({
+        path,
+        append_to_response: 'credits,videos,similar,watch/providers',
+        language: 'en-US',
+      });
+      const { data } = await axios.get(`/api/tmdb?${params.toString()}`);
       return {
         ...data,
         credits: data.credits || { cast: [], crew: [] },

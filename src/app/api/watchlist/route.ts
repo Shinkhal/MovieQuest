@@ -34,33 +34,37 @@ export async function POST(req: Request) {
 
     await connectToDatabase();
 
+    // First ensure the base user watchlist document exists without conditional movie criteria
+    await Watchlist.findOneAndUpdate(
+      { userId },
+      { $setOnInsert: { userId, userEmail: session.user.email, movies: [] } },
+      { upsert: true, new: true }
+    );
+
     if (syncList && Array.isArray(syncList)) {
-      // Atomic upsert: create the document if it doesn't exist, then add each movie only if its id is not already present
+      // Add each movie only if its id is not already in the array
       for (const m of syncList) {
+        if (!m || !m.id) continue;
         await Watchlist.findOneAndUpdate(
           { userId, 'movies.id': { $ne: m.id } },
-          {
-            $setOnInsert: { userEmail: session.user.email },
-            $push: { movies: { $each: [m], $position: 0 } },
-          },
-          { upsert: true, new: true }
-        ).catch(() => {
-          // Ignore duplicate key errors from concurrent upserts
-        });
+          { $push: { movies: { $each: [m], $position: 0 } } }
+        );
       }
       const updated = await Watchlist.findOne({ userId });
       return NextResponse.json({ success: true, movies: updated?.movies || [] });
-    } else if (movie) {
+    } else if (movie && movie.id) {
       // Atomic add: only push if the movie id isn't already in the array
       const result = await Watchlist.findOneAndUpdate(
         { userId, 'movies.id': { $ne: movie.id } },
-        {
-          $setOnInsert: { userEmail: session.user.email },
-          $push: { movies: { $each: [movie], $position: 0 } },
-        },
-        { upsert: true, new: true }
+        { $push: { movies: { $each: [movie], $position: 0 } } },
+        { new: true }
       );
-      return NextResponse.json({ success: true, movies: result?.movies || [] });
+      if (!result) {
+        // Movie already existed in the watchlist; return existing list
+        const existing = await Watchlist.findOne({ userId });
+        return NextResponse.json({ success: true, movies: existing?.movies || [] });
+      }
+      return NextResponse.json({ success: true, movies: result.movies || [] });
     }
 
     return NextResponse.json({ error: 'No movie data provided' }, { status: 400 });

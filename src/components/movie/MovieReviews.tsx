@@ -41,7 +41,6 @@ export function MovieReviews({
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
-  const [guestName, setGuestName] = useState('');
 
   const fetchReviews = async () => {
     try {
@@ -61,6 +60,10 @@ export function MovieReviews({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session?.user) {
+      signIn();
+      return;
+    }
     if (!comment.trim()) {
       toast.error('Please write a review comment');
       return;
@@ -73,8 +76,6 @@ export function MovieReviews({
         movieTitle,
         rating,
         comment: comment.trim(),
-        userName: session?.user?.name || guestName.trim() || 'Film Enthusiast',
-        role: session?.user ? 'Verified Member' : 'Cinephile',
       };
 
       const { data } = await axios.post('/api/reviews', payload);

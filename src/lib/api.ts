@@ -2,24 +2,49 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Movie, Genre, MovieListResponse } from '@/types/api';
 
-const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 /**
- * Generic GET helper that automatically attaches the TMDB API key.
+ * Generic GET helper that routes through our secure server proxy on client
+ * or directly to TMDB when executing on the server.
  */
 export async function fetchFromTmdb<T>(url: string, params?: Record<string, string | number | undefined>): Promise<T> {
-  const parsedUrl = new URL(url);
-  if (TMDB_API_KEY) {
-    parsedUrl.searchParams.set('api_key', TMDB_API_KEY);
+  const isServer = typeof window === 'undefined';
+
+  if (isServer) {
+    const parsedUrl = new URL(url.startsWith('http') ? url : `https://api.themoviedb.org/3${url}`);
+    if (TMDB_API_KEY) {
+      parsedUrl.searchParams.set('api_key', TMDB_API_KEY);
+    }
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') {
+          parsedUrl.searchParams.set(k, String(v));
+        }
+      });
+    }
+    const { data } = await axios.get<T>(parsedUrl.toString(), { timeout: 10000 });
+    return data;
   }
+
+  // Client-side: proxy through /api/tmdb to keep API key hidden on server
+  let path = url;
+  if (url.startsWith('https://api.themoviedb.org/3')) {
+    path = url.replace('https://api.themoviedb.org/3', '');
+  }
+
+  const queryParams = new URLSearchParams();
+  queryParams.set('path', path);
+
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== '') {
-        parsedUrl.searchParams.set(k, String(v));
+        queryParams.set(k, String(v));
       }
     });
   }
-  const { data } = await axios.get<T>(parsedUrl.toString());
+
+  const { data } = await axios.get<T>(`/api/tmdb?${queryParams.toString()}`);
   return data;
 }
 
@@ -49,7 +74,7 @@ export function useGenres() {
   return useQuery<Genre[]>({
     queryKey: ['genres'],
     queryFn: () =>
-      fetchFromTmdb<{ genres: Genre[] }>('https://api.themoviedb.org/3/genre/movie/list').then(
+      fetchFromTmdb<{ genres: Genre[] }>('/genre/movie/list').then(
         (r) => r.genres || []
       ),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
@@ -80,7 +105,7 @@ export function useMovies(params: UseMoviesParams) {
     queryKey: ['movies', type, query, genreId, page, sortBy],
     queryFn: async () => {
       if (type === 'search' && query.trim()) {
-        return fetchFromTmdb<MovieListResponse>('https://api.themoviedb.org/3/search/movie', {
+        return fetchFromTmdb<MovieListResponse>('/search/movie', {
           query: query.trim(),
           page,
           include_adult: 'false',
@@ -89,28 +114,28 @@ export function useMovies(params: UseMoviesParams) {
 
       if (type === 'trending') {
         return fetchFromTmdb<MovieListResponse>(
-          'https://api.themoviedb.org/3/trending/movie/week',
+          '/trending/movie/week',
           { page }
         );
       }
 
       if (type === 'top_rated') {
         return fetchFromTmdb<MovieListResponse>(
-          'https://api.themoviedb.org/3/movie/top_rated',
+          '/movie/top_rated',
           { page }
         );
       }
 
       if (type === 'now_playing') {
         return fetchFromTmdb<MovieListResponse>(
-          'https://api.themoviedb.org/3/movie/now_playing',
+          '/movie/now_playing',
           { page }
         );
       }
 
       if (type === 'genre' || genreId) {
         return fetchFromTmdb<MovieListResponse>(
-          'https://api.themoviedb.org/3/discover/movie',
+          '/discover/movie',
           {
             with_genres: genreId,
             sort_by: sortBy,
@@ -122,7 +147,7 @@ export function useMovies(params: UseMoviesParams) {
 
       // Default 'popular' or discover
       return fetchFromTmdb<MovieListResponse>(
-        'https://api.themoviedb.org/3/discover/movie',
+        '/discover/movie',
         {
           sort_by: sortBy,
           page,
@@ -139,7 +164,7 @@ export function useMovies(params: UseMoviesParams) {
 export async function getTrendingMoviesServer(): Promise<Movie[]> {
   try {
     const data = await fetchFromTmdb<MovieListResponse>(
-      'https://api.themoviedb.org/3/trending/movie/week'
+      '/trending/movie/week'
     );
     return data.results || [];
   } catch {

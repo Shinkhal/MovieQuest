@@ -71,28 +71,37 @@ export function ResultCard({ movie }: { movie: Movie }) {
   return (
     <Card className="group relative bg-card/60 hover:bg-card/90 border border-border/60 hover:border-primary/50 transition-all duration-300 overflow-hidden h-full flex flex-col rounded-2xl shadow-sm hover:shadow-xl hover:shadow-primary/5">
       {/* Poster Container */}
-      <Link href={`/movie/${movie.id}`} className="block relative aspect-[2/3] w-full overflow-hidden bg-muted">
-        {posterUrl ? (
-          <Image
-            src={posterUrl}
-            alt={movie.title}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full bg-muted/60 text-muted-foreground p-4 text-center">
-            <Film className="h-10 w-10 mb-2 opacity-40" />
-            <span className="text-xs font-medium">No Poster Available</span>
-          </div>
-        )}
+      <div className="relative aspect-[2/3] w-full overflow-hidden bg-muted">
+        <Link href={`/movie/${movie.id}`} className="block w-full h-full relative">
+          {posterUrl ? (
+            <Image
+              src={posterUrl}
+              alt={movie.title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full bg-muted/60 text-muted-foreground p-4 text-center">
+              <Film className="h-10 w-10 mb-2 opacity-40" />
+              <span className="text-xs font-medium">No Poster Available</span>
+            </div>
+          )}
 
-        {/* Backdrop gradient on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Backdrop gradient on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Quick detail overlay at bottom of poster on hover */}
+          <div className="absolute bottom-2 left-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            <p className="text-[11px] text-white/90 line-clamp-2 leading-tight">
+              {movie.overview || 'No synopsis provided.'}
+            </p>
+          </div>
+        </Link>
 
         {/* Rating badge */}
-        <div className="absolute top-2.5 right-2.5 z-10">
+        <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none">
           <Badge
             className={cn(
               'font-semibold backdrop-blur-md border text-xs px-2 py-0.5 shadow-md flex items-center gap-1',
@@ -110,12 +119,12 @@ export function ResultCard({ movie }: { movie: Movie }) {
           </Badge>
         </div>
 
-        {/* Bookmark Action Button */}
+        {/* Bookmark Action Button (Sibling to Link, not nested inside) */}
         <button
           onClick={handleBookmark}
           aria-label={isBookmarked ? 'Remove from watchlist' : 'Add to watchlist'}
           className={cn(
-            'absolute top-2.5 left-2.5 z-10 p-2 rounded-full backdrop-blur-md border transition-all duration-200',
+            'absolute top-2.5 left-2.5 z-10 p-2 rounded-full backdrop-blur-md border transition-all duration-200 cursor-pointer',
             isBookmarked
               ? 'bg-primary text-primary-foreground border-primary shadow-lg scale-105'
               : 'bg-black/60 text-white/80 hover:text-white border-white/20 hover:bg-black/80 opacity-0 group-hover:opacity-100'
@@ -123,14 +132,7 @@ export function ResultCard({ movie }: { movie: Movie }) {
         >
           <Bookmark className={cn('h-3.5 w-3.5', isBookmarked && 'fill-current')} />
         </button>
-
-        {/* Quick detail overlay at bottom of poster on hover */}
-        <div className="absolute bottom-2 left-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <p className="text-[11px] text-white/90 line-clamp-2 leading-tight">
-            {movie.overview || 'No synopsis provided.'}
-          </p>
-        </div>
-      </Link>
+      </div>
 
       {/* Card Content / Details */}
       <CardContent className="p-3.5 flex-grow flex flex-col justify-between">

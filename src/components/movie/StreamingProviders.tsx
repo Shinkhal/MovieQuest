@@ -134,10 +134,43 @@ export function StreamingProviders({ movie }: { movie: Movie }) {
           {rent.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                Rent / Buy Digital
+                Rent Digital
               </h4>
               <div className="flex flex-wrap gap-3">
                 {rent.slice(0, 6).map((provider) => (
+                  <button
+                    key={provider.provider_id}
+                    onClick={() => openStreamingService(provider.provider_name, movie)}
+                    className="flex items-center gap-2 p-2 rounded-xl border border-border/60 bg-card/40 hover:bg-card hover:border-primary/40 transition text-left"
+                  >
+                    <div className="relative w-7 h-7 rounded-md overflow-hidden bg-background border border-border/30 flex-shrink-0">
+                      {provider.logo_path ? (
+                        <Image
+                          src={getImageUrl(provider.logo_path)}
+                          alt={provider.provider_name}
+                          fill
+                          className="object-contain p-0.5"
+                        />
+                      ) : (
+                        <Tv className="h-3.5 w-3.5 m-auto text-muted-foreground" />
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {provider.provider_name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {buy.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                Buy Digital
+              </h4>
+              <div className="flex flex-wrap gap-3">
+                {buy.slice(0, 6).map((provider) => (
                   <button
                     key={provider.provider_id}
                     onClick={() => openStreamingService(provider.provider_name, movie)}

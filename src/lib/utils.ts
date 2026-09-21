@@ -18,3 +18,11 @@ export function getAppBaseUrl(): string {
   return 'https://movies-quest.vercel.app';
 }
 
+export function sanitizeText(input: unknown): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .replace(/<[^>]*>/g, '') // Strip HTML tags
+    .replace(/javascript:/gi, '') // Prevent javascript: URIs
+    .replace(/on\w+="[^"]*"/gi, '') // Strip inline event handlers
+    .trim();
+}
